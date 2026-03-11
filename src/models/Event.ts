@@ -101,7 +101,7 @@ EventSchema.index({ locationCoords: '2dsphere' });
 EventSchema.index({ views: -1 });
 
 // Auto-generate slug and parse date before saving
-EventSchema.pre('save', function (next) {
+EventSchema.pre('save', async function () {
     if (!this.slug || this.isModified('title')) {
         this.slug = generateSlug(this.title);
     }
@@ -119,7 +119,6 @@ EventSchema.pre('save', function (next) {
             console.error('Error parsing date for startAt:', e);
         }
     }
-    next();
 });
 
 if (mongoose.models.Event) {

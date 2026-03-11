@@ -120,7 +120,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Handle specific sort filters that modify the query tag
-        if (sort === 'featured' && !tag) {
+        if (sort === 'featured' && !tagsParam) {
             filter.tags = 'Featured';
         }
 

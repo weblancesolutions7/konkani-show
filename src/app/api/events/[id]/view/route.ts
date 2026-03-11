@@ -3,14 +3,18 @@ import dbConnect from '@/lib/mongodb';
 import EventModel from '@/models/Event';
 import mongoose from 'mongoose';
 
+interface RouteParams {
+    params: Promise<{ id: string }>;
+}
+
 export async function POST(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: RouteParams
 ) {
     try {
         await dbConnect();
         
-        const { id } = params;
+        const { id } = await params;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return NextResponse.json({ error: 'Invalid event ID' }, { status: 400 });

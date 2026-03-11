@@ -1,17 +1,18 @@
 
 'use client';
 
-import React from 'react';
+import { use } from 'react';
 import { useEvents } from '@/hooks/useEvents';
 import EventCard from '@/components/ui/EventCard';
 import { CONFIG } from '@/config/api';
 
 interface Props {
-    params: { category: string };
+    params: Promise<{ category: string }>;
 }
 
 export default function CategoryPage({ params }: Props) {
-    const category = decodeURIComponent(params.category);
+    const { category: rawCategory } = use(params);
+    const category = decodeURIComponent(rawCategory);
     const { events, loading } = useEvents(category);
 
     return (
