@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { CONFIG } from '@/config/api';
 import TagChip from '@/components/ui/TagChip';
 import CalendarButtons from '@/components/event/CalendarButtons';
+import RegisterButton from '@/components/event/RegisterButton';
 import { Event } from '@/types';
 
 interface Props {
@@ -149,9 +150,7 @@ export default async function EventPage({ params }: Props) {
                             </div>
 
                             <div className="space-y-4">
-                                <button className="w-full py-4 bg-primary text-white font-black rounded-xl shadow-lg hover:bg-primary-dark transition-all transform active:scale-95">
-                                    Register for Event
-                                </button>
+                                <RegisterButton event={event} />
                                 {event.meetingLink && (
                                     <a
                                         href={event.meetingLink}

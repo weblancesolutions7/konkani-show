@@ -9,6 +9,7 @@ import { useEvents } from '@/hooks/useEvents';
 import CategoryTabs from '@/components/ui/CategoryTabs';
 import TagChip from '@/components/ui/TagChip';
 import HeroBanner from '@/components/home/HeroBanner';
+import { useEffect } from 'react';
 
 // Lazy load heavy components
 const EventCard = dynamic(() => import('@/components/ui/EventCard'), {
@@ -23,10 +24,29 @@ export default function HomePage() {
   const { preferences, loading: prefLoading } = usePreferences();
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [selectedCities, setSelectedCities] = useState<string[]>([]);
+
+  useEffect(() => {
+    const loadCities = () => {
+      const saved = localStorage.getItem('selectedCities');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) setSelectedCities(parsed);
+        } catch (e) { console.error(e); }
+      }
+    };
+
+    loadCities();
+    window.addEventListener('cityChange', loadCities);
+    return () => window.removeEventListener('cityChange', loadCities);
+  }, []);
+
   const { events, loading: eventsLoading } = useEvents(
     selectedCategory === 'All' ? undefined : selectedCategory,
     undefined,
-    selectedTag || undefined
+    selectedTag || undefined,
+    selectedCities.join(',')
   );
 
   if (prefLoading) {
@@ -60,7 +80,12 @@ export default function HomePage() {
             <Link href="/categories" className="text-primary font-bold hover:underline">View All</Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-            {featuredItems.map((item, i) => (
+            {featuredItems.reduce((acc: any[], item) => {
+              if (!acc.some(i => i.category === item.category)) {
+                acc.push(item);
+              }
+              return acc;
+            }, []).map((item, i) => (
               <FeaturedCategoryCard
                 key={i}
                 item={item}
@@ -93,6 +118,8 @@ export default function HomePage() {
                 key={tag.id}
                 label={tag.name}
                 variant={selectedTag === tag.name ? 'primary' : 'outline'}
+                mode="subtle"
+                showHash={true}
                 onClick={() => setSelectedTag(prev => prev === tag.name ? null : tag.name)}
               />
             ))}
@@ -108,15 +135,56 @@ export default function HomePage() {
             <Link href="/events" className="text-primary font-bold hover:underline">See All</Link>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-8">
+          <div className="space-y-12">
             {eventsLoading ? (
-              Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="aspect-[2/3] rounded-xl bg-surface-200 animate-pulse" />
-              ))
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-8">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="aspect-[2/3] rounded-xl bg-surface-200 animate-pulse" />
+                ))}
+              </div>
             ) : events.length > 0 ? (
-              events.map(event => <EventCard key={event.id} event={event} />)
+              (() => {
+                const isSelected = (event: any) =>
+                  selectedCities.length === 0 ||
+                  selectedCities.some(city => event.location.toLowerCase().includes(city.toLowerCase()));
+
+                const selectedEvents = events.filter(isSelected);
+                const otherEvents = events.filter(e => !isSelected(e));
+
+                return (
+                  <>
+                    {/* Selected Cities Section */}
+                    {selectedEvents.length > 0 && (
+                      <div>
+                        {selectedCities.length > 0 && (
+                          <div className="flex items-center gap-4 mb-6">
+                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary/60 whitespace-nowrap">Near You</h3>
+                            <div className="h-px w-full bg-surface-200" />
+                          </div>
+                        )}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-8">
+                          {selectedEvents.map(event => <EventCard key={event.id} event={event} />)}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Other Cities Section */}
+                    {otherEvents.length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-4 mb-6">
+                          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-surface-400 whitespace-nowrap">Explore Other Cities</h3>
+                          <div className="h-px w-full bg-surface-200" />
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-8 opacity-90">
+                          {otherEvents.map(event => <EventCard key={event.id} event={event} />)}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                );
+              })()
             ) : (
-              <div className="col-span-full py-20 text-center">
+              <div className="py-20 text-center">
                 <p className="text-surface-800/50 text-xl font-medium">No events found in this category.</p>
               </div>
             )}

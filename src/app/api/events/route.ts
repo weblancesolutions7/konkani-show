@@ -10,6 +10,8 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url);
         const category = searchParams.get('category');
         const status = searchParams.get('status');
+        const locationsParam = searchParams.get('location');
+        const locations = locationsParam ? locationsParam.split(',') : [];
 
         // Build query filter
         const filter: Record<string, unknown> = {};
@@ -30,14 +32,52 @@ export async function GET(request: NextRequest) {
             filter.tags = tag;
         }
 
-        const events = await EventModel.find(filter).sort({ createdAt: -1 }).lean();
+        const query = searchParams.get('q') || searchParams.get('search');
+        if (query) {
+            filter.$or = [
+                { title: { $regex: query, $options: 'i' } },
+                { description: { $regex: query, $options: 'i' } },
+                { location: { $regex: query, $options: 'i' } },
+            ];
+        }
 
-        // Transform _id to id for frontend compatibility
-        const transformed = events.map((event) => ({
+        // Fetch matching events
+        const allEvents = await EventModel.find(filter).lean();
+
+        let transformed = allEvents.map((event) => ({
             ...event,
             id: event._id.toString(),
             _id: undefined,
         }));
+
+        // Comprehensive sort: Location priority (if provided) followed by Date (nearest first)
+        transformed.sort((a: any, b: any) => {
+            // 1. Location priority
+            if (locations.length > 0) {
+                const aMatch = locations.some(loc => a.location.toLowerCase().includes(loc.toLowerCase()));
+                const bMatch = locations.some(loc => b.location.toLowerCase().includes(loc.toLowerCase()));
+
+                if (aMatch && !bMatch) return -1;
+                if (!aMatch && bMatch) return 1;
+            }
+
+            // 2. Chronological priority (nearest first)
+            try {
+                const timeA = new Date(`${a.date} ${a.time}`).getTime();
+                const timeB = new Date(`${b.date} ${b.time}`).getTime();
+                
+                if (!isNaN(timeA) && !isNaN(timeB)) {
+                    return timeA - timeB;
+                }
+            } catch (err) {
+                // Fallback to createdAt if date parsing fails
+                const createA = new Date(a.createdAt).getTime();
+                const createB = new Date(b.createdAt).getTime();
+                return createB - createA;
+            }
+
+            return 0;
+        });
 
         return NextResponse.json(transformed);
     } catch (error) {

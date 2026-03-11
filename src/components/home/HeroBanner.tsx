@@ -50,14 +50,14 @@ const HeroBanner: React.FC<HeroBannerProps> = ({ items }) => {
                                 Featured
                             </span>
                             <h1 className="text-3xl md:text-5xl font-black text-white mb-4 drop-shadow-lg">
-                                Best of {item.category} Shows
+                                {item.title || `Best of ${item.category} Shows`}
                             </h1>
                             <p className="text-white/80 text-sm md:text-lg mb-6 line-clamp-2">
-                                Experience the finest Konkani cultural representation through our curated collection of {item.category.toLowerCase()} events.
+                                {item.description || `Experience the finest Konkani cultural representation through our curated collection of ${item.category.toLowerCase()} events.`}
                             </p>
                             <Link
-                                href={`/category/${item.category.toLowerCase()}`}
-                                className="inline-flex items-center px-8 py-3 bg-white text-primary font-bold rounded-lg hover:bg-primary hover:text-white transition-all transform hover:scale-105 active:scale-95 shadow-lg"
+                                href={item.link || `/category/${item.category.toLowerCase()}`}
+                                className="inline-flex items-center px-8 py-3 bg-white text-primary font-bold rounded-lg hover:bg-primary hover:text-white transition-all transform hover:scale-105 active:scale-[0.98] shadow-lg"
                             >
                                 Explore Now
                             </Link>

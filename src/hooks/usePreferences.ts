@@ -28,5 +28,25 @@ export function usePreferences() {
         fetchPreferences();
     }, []);
 
-    return { preferences, loading, error };
+    async function updatePreferences(newPrefs: Preferences) {
+        try {
+            const response = await fetch(API_ROUTES.PREFERENCES, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newPrefs),
+            });
+            if (!response.ok) throw new Error('Failed to update preferences');
+            const data = await response.json();
+            setPreferences(data);
+            return data;
+        } catch (err) {
+            const error = err instanceof Error ? err : new Error('Unknown error');
+            setError(error);
+            throw error;
+        }
+    }
+
+    return { preferences, loading, error, updatePreferences, setPreferences };
 }

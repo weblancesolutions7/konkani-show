@@ -69,6 +69,16 @@ export default function SubmitEventPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Validation: Date and Time must be in the future
+        const now = new Date();
+        const selectedDateTime = new Date(`${date}T${time}`);
+
+        if (selectedDateTime <= now) {
+            alert('Please select a future date and time for your event.');
+            return;
+        }
+
         setSubmitting(true);
 
         try {
@@ -282,6 +292,7 @@ export default function SubmitEventPage() {
                                             <input
                                                 type="date"
                                                 required
+                                                min={new Date().toISOString().split('T')[0]}
                                                 value={date}
                                                 onChange={(e) => setDate(e.target.value)}
                                                 className="w-full p-5 bg-surface-50 rounded-2xl outline-none focus:bg-white border-2 border-transparent focus:border-primary transition-all font-bold"

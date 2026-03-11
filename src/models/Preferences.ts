@@ -3,10 +3,15 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 export interface IPreferences extends Document {
     tags: { id: string; name: string }[];
     categories: { id: string; name: string; count?: number }[];
+    cities: string[];
     featuredCategories: {
+        id: string;
         category: string;
-        highlightClass?: string;
+        title?: string;
+        description?: string;
         featuredImage?: string;
+        link?: string;
+        highlightClass?: string;
     }[];
 }
 
@@ -25,11 +30,16 @@ const PreferencesSchema = new Schema<IPreferences>(
                 count: { type: Number, default: 0 },
             },
         ],
+        cities: [{ type: String }],
         featuredCategories: [
             {
+                id: { type: String, required: true },
                 category: { type: String, required: true },
-                highlightClass: { type: String, default: '' },
-                featuredImage: { type: String, default: '' },
+                title: { type: String },
+                description: { type: String },
+                featuredImage: { type: String },
+                link: { type: String },
+                highlightClass: { type: String },
             },
         ],
     },

@@ -24,20 +24,24 @@ export async function GET() {
                     { id: '3', name: 'Musical', count: 0 },
                     { id: '4', name: 'Workshop', count: 0 },
                 ],
+                cities: ['Mangalore', 'Udupi', 'Goa', 'Mumbai', 'Bangalore'],
                 featuredCategories: [
                     {
+                        id: '1',
                         category: 'Drama',
                         highlightClass: 'bg-primary',
                         featuredImage:
                             'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop',
                     },
                     {
+                        id: '2',
                         category: 'Musical',
                         highlightClass: 'bg-accent',
                         featuredImage:
                             'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?q=80&w=2070&auto=format&fit=crop',
                     },
                     {
+                        id: '3',
                         category: 'Comedy',
                         highlightClass: 'bg-secondary',
                         featuredImage:
@@ -59,6 +63,16 @@ export async function GET() {
             acc[curr._id] = curr.count;
             return acc;
         }, {} as Record<string, number>);
+
+        // Dynamically fetch unique cities from APPROVED events
+        const eventCities = await EventModel.distinct('location', { status: 'APPROVED' });
+
+        // Merge event cities with preferences.cities, ensuring uniqueness
+        if (preferences) {
+            const existingCities = preferences.cities || [];
+            const mergedCities = Array.from(new Set([...existingCities, ...eventCities]));
+            preferences.cities = mergedCities.sort();
+        }
 
         // Update the preferences categories array with dynamic counts
         if (preferences && preferences.categories) {
@@ -83,6 +97,14 @@ export async function PUT(request: NextRequest) {
     try {
         await dbConnect();
         const body = await request.json();
+        
+        // Ensure all featured items have an ID to satisfy validation
+        if (body.featuredCategories) {
+            body.featuredCategories = body.featuredCategories.map((f: any) => ({
+                ...f,
+                id: f.id || Math.random().toString(36).substr(2, 9)
+            }));
+        }
 
         const preferences = await PreferencesModel.findOneAndUpdate(
             {},

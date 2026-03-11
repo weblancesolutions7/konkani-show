@@ -15,14 +15,16 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ categories, activeCategory,
                 <button
                     key={category.id || category.name || index}
                     onClick={() => onCategoryChange(category.name)}
-                    className={`px-6 py-2 rounded-full whitespace-nowrap font-semibold transition-all duration-200 border-2 ${activeCategory === category.name
-                        ? 'bg-primary border-primary text-white shadow-md scale-105'
-                        : 'bg-white border-surface-200 text-surface-900 hover:border-primary/50 shadow-sm'
+                    className={`px-6 py-2.5 rounded-full whitespace-nowrap font-bold transition-all duration-300 border-2 ${activeCategory === category.name
+                        ? 'bg-brand-gradient border-transparent text-white shadow-premium scale-105 ring-2 ring-primary/20'
+                        : 'bg-white border-surface-200/80 text-surface-700 hover:border-primary/30 hover:bg-surface-50 shadow-sm'
                         }`}
                 >
-                    {category.name}
+                    <span className="relative z-10">{category.name}</span>
                     {category.count !== undefined && (
-                        <span className={`ml-2 text-xs px-1.5 py-0.5 rounded-full ${activeCategory === category.name ? 'bg-white/20' : 'bg-surface-200'
+                        <span className={`ml-2 text-[10px] font-black px-2 py-0.5 rounded-lg transition-colors duration-300 ${activeCategory === category.name 
+                            ? 'bg-white/20 text-white' 
+                            : 'bg-surface-100 text-surface-500 group-hover:bg-surface-200'
                             }`}>
                             {category.count}
                         </span>

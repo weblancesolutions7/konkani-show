@@ -11,15 +11,20 @@ export interface Category {
 }
 
 export interface FeaturedCategory {
+  id: string;
   category: string;
-  highlightClass?: string;
+  title?: string;
+  description?: string;
   featuredImage?: string;
+  link?: string;
+  highlightClass?: string;
   uiProps?: Record<string, any>;
 }
 
 export interface Preferences {
   tags: Tag[];
   categories: Category[];
+  cities: string[];
   featuredCategories: FeaturedCategory[];
 }
 
@@ -43,4 +48,4 @@ export interface Event {
   createdAt: string;
 }
 
-export interface CreateEventDTO extends Omit<Event, 'id' | 'slug' | 'status' | 'createdAt'> {}
+export interface CreateEventDTO extends Omit<Event, 'id' | 'slug' | 'status' | 'createdAt'> { }
