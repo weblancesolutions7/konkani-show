@@ -55,3 +55,14 @@ body {
 .bg-brand-gradient {
   background: linear-gradient(135deg, #7030ef 0%, #db1fff 100%) !important;
 }
+
+.no-scrollbar {
+  -ms-overflow-style: none !important; /* IE and Edge */
+  scrollbar-width: none !important; /* Firefox */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari and Opera */
+  width: 0 !important;
+  height: 0 !important;
+}

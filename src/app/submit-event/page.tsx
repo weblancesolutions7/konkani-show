@@ -6,6 +6,7 @@ import { usePreferences } from '@/hooks/usePreferences';
 import { API_ROUTES } from '@/config/api';
 import OTPInput from '@/components/ui/OTPInput';
 import TagChip from '@/components/ui/TagChip';
+import WorldLocationPicker, { LocationData } from '@/components/event/WorldLocationPicker';
 
 export default function SubmitEventPage() {
     const { preferences } = usePreferences();
@@ -20,7 +21,10 @@ export default function SubmitEventPage() {
     const [title, setTitle] = useState('');
     const [date, setDate] = useState('');
     const [time, setTime] = useState('');
-    const [location, setLocation] = useState('');
+    
+    // Worldwide Location State
+    const [locationData, setLocationData] = useState<LocationData | null>(null);
+    
     const [description, setDescription] = useState('');
     const [category, setCategory] = useState('');
     const [entry, setEntry] = useState('');
@@ -82,12 +86,25 @@ export default function SubmitEventPage() {
         setSubmitting(true);
 
         try {
+            // Create fallback display string
+            const displayParts = [];
+            if (locationData?.venueAddress) displayParts.push(locationData.venueAddress);
+            if (locationData?.city) displayParts.push(locationData.city);
+            if (locationData?.state) displayParts.push(locationData.state);
+            if (locationData?.country) displayParts.push(locationData.country);
+            const locationString = displayParts.join(', ') || 'Online / TBD';
+
             const eventData = {
                 title,
                 description,
                 date,
                 time,
-                location,
+                location: locationString,
+                locationDetails: locationData,
+                locationCoords: locationData ? {
+                    type: 'Point',
+                    coordinates: [locationData.lng, locationData.lat] // [longitude, latitude]
+                } : undefined,
                 category: category || preferences?.categories[0]?.name || 'Drama',
                 tags: selectedTags,
                 featureImage: imageUrl,
@@ -109,7 +126,7 @@ export default function SubmitEventPage() {
             setDescription('');
             setDate('');
             setTime('');
-            setLocation('');
+            setLocationData(null);
             setCategory('');
             setSelectedTags([]);
             setImageUrl('');
@@ -310,19 +327,11 @@ export default function SubmitEventPage() {
                                         </div>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-black uppercase tracking-widest text-surface-800/40 ml-1">Venue Location</label>
-                                        <div className="relative">
-                                            <span className="absolute left-5 top-1/2 -translate-y-1/2 opacity-40">📍</span>
-                                            <input
-                                                type="text"
-                                                required
-                                                placeholder="Venue Name, City"
-                                                value={location}
-                                                onChange={(e) => setLocation(e.target.value)}
-                                                className="w-full p-5 pl-12 bg-surface-50 rounded-2xl outline-none focus:bg-white border-2 border-transparent focus:border-primary transition-all font-bold"
-                                            />
-                                        </div>
+                                    <div className="space-y-4">
+                                        <WorldLocationPicker 
+                                            value={locationData || undefined}
+                                            onChange={(data) => setLocationData(data)}
+                                        />
                                     </div>
                                 </div>
                             </section>

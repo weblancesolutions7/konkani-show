@@ -1,15 +1,14 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { usePreferences } from '@/hooks/usePreferences';
 import { useEvents } from '@/hooks/useEvents';
-import CategoryTabs from '@/components/ui/CategoryTabs';
-import TagChip from '@/components/ui/TagChip';
 import HeroBanner from '@/components/home/HeroBanner';
-import { useEffect } from 'react';
+import { useUserLocation } from '@/hooks/useUserLocation';
+import ScrollRow from '@/components/ui/ScrollRow';
 
 // Lazy load heavy components
 const EventCard = dynamic(() => import('@/components/ui/EventCard'), {
@@ -22,9 +21,8 @@ const FeaturedCategoryCard = dynamic(() => import('@/components/ui/FeaturedCateg
 
 export default function HomePage() {
   const { preferences, loading: prefLoading } = usePreferences();
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
+  const { location, loading: locLoading } = useUserLocation();
 
   useEffect(() => {
     const loadCities = () => {
@@ -42,11 +40,26 @@ export default function HomePage() {
     return () => window.removeEventListener('cityChange', loadCities);
   }, []);
 
-  const { events, loading: eventsLoading } = useEvents(
-    selectedCategory === 'All' ? undefined : selectedCategory,
+  const { events: nearbyEvents, loading: nearbyLoading } = useEvents(
     undefined,
-    selectedTag || undefined,
-    selectedCities.join(',')
+    undefined,
+    undefined,
+    selectedCities.join(','),
+    undefined,
+    location?.lat,
+    location?.lng
+  );
+
+  const { events: recommendedEvents, loading: recLoading } = useEvents(
+    undefined, undefined, undefined, undefined, undefined, undefined, undefined, 'recommended'
+  );
+
+  const { events: popularEvents, loading: popLoading } = useEvents(
+    undefined, undefined, undefined, undefined, undefined, undefined, undefined, 'popular'
+  );
+
+  const { events: featuredEvents, loading: featLoading } = useEvents(
+    undefined, undefined, undefined, undefined, undefined, undefined, undefined, 'featured'
   );
 
   if (prefLoading) {
@@ -73,7 +86,62 @@ export default function HomePage() {
           <HeroBanner items={featuredItems} />
         </section>
 
-        {/* Featured Categories Grid (Stripe) */}
+        {/* Recommended Events Section */}
+        <section className="mb-16">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-black text-foreground">Recommended For You</h2>
+            <Link href="/events?sort=recommended" className="text-primary font-bold hover:underline">See All</Link>
+          </div>
+          <div className="space-y-12">
+            {recLoading ? (
+              <div className="flex gap-4 md:gap-8 overflow-x-auto pb-4 snap-x no-scrollbar">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="min-w-[160px] md:min-w-[200px] aspect-[2/3] rounded-xl bg-surface-200 animate-pulse snap-start shrink-0" />
+                ))}
+              </div>
+            ) : recommendedEvents.length > 0 ? (
+              <ScrollRow>
+                {recommendedEvents.map(event => (
+                    <div key={event.id} className="flex w-[180px] md:w-[260px] snap-start shrink-0">
+                        <EventCard event={event} />
+                    </div>
+                ))}
+              </ScrollRow>
+            ) : (
+                <p className="text-surface-800/50">No recommendations available at the moment.</p>
+            )}
+          </div>
+        </section>
+
+        {/* Nearby Events Section */}
+        <section className="mb-16">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-black text-foreground">
+                {location?.source === 'browser' ? 'Shows Near You (Precise)' : `Shows Near ${location?.city || 'You'}`}
+            </h2>
+          </div>
+          <div className="space-y-12">
+            {nearbyLoading ? (
+              <div className="flex gap-4 md:gap-8 overflow-x-auto pb-4 snap-x no-scrollbar">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="min-w-[160px] md:min-w-[200px] aspect-[2/3] rounded-xl bg-surface-200 animate-pulse snap-start shrink-0" />
+                ))}
+              </div>
+            ) : nearbyEvents.length > 0 ? (
+                <ScrollRow>
+                    {nearbyEvents.map(event => (
+                        <div key={event.id} className="flex w-[180px] md:w-[260px] snap-start shrink-0">
+                            <EventCard event={event} />
+                        </div>
+                    ))}
+                </ScrollRow>
+            ) : (
+                <p className="text-surface-800/50">No events found in your area. Try searching for another city.</p>
+            )}
+          </div>
+        </section>
+
+        {/* The Best of Konkani Shows */}
         <section className="mb-16">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-black text-foreground">The Best of Konkani Shows</h2>
@@ -90,103 +158,64 @@ export default function HomePage() {
                 key={i}
                 item={item}
                 onClick={() => {
-                  setSelectedCategory(item.category);
-                  document.getElementById('events-section')?.scrollIntoView({ behavior: 'smooth' });
+                    // Navigate to category page since we removed tabs
+                    window.location.href = `/events?category=${item.category}`; 
                 }}
               />
             ))}
           </div>
         </section>
 
-        {/* Category Navigation */}
-        <section className="mb-8 overflow-hidden">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-black text-foreground">Categories</h2>
-          </div>
-          <CategoryTabs
-            categories={allCategories as any}
-            activeCategory={selectedCategory}
-            onCategoryChange={setSelectedCategory}
-          />
-        </section>
-
-        {/* Tags Quick Filter */}
-        <section className="mb-10">
-          <div className="flex flex-wrap gap-2">
-            {preferences?.tags.map(tag => (
-              <TagChip
-                key={tag.id}
-                label={tag.name}
-                variant={selectedTag === tag.name ? 'primary' : 'outline'}
-                mode="subtle"
-                showHash={true}
-                onClick={() => setSelectedTag(prev => prev === tag.name ? null : tag.name)}
-              />
-            ))}
-          </div>
-        </section>
-
-        {/* Events Grid */}
-        <section id="events-section">
+        {/* Popular Events Section */}
+        <section className="mb-16">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-black text-foreground">
-              {selectedCategory === 'All' ? 'Upcoming Shows' : `${selectedCategory} Events`}
-            </h2>
-            <Link href="/events" className="text-primary font-bold hover:underline">See All</Link>
+            <h2 className="text-2xl font-black text-foreground">Popular Events</h2>
+            <Link href="/events?sort=popular" className="text-primary font-bold hover:underline">See All</Link>
           </div>
-
           <div className="space-y-12">
-            {eventsLoading ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-8">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className="aspect-[2/3] rounded-xl bg-surface-200 animate-pulse" />
+            {popLoading ? (
+              <div className="flex gap-4 md:gap-8 overflow-x-auto pb-4 snap-x no-scrollbar">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="min-w-[160px] md:min-w-[200px] aspect-[2/3] rounded-xl bg-surface-200 animate-pulse snap-start shrink-0" />
                 ))}
               </div>
-            ) : events.length > 0 ? (
-              (() => {
-                const isSelected = (event: any) =>
-                  selectedCities.length === 0 ||
-                  selectedCities.some(city => event.location.toLowerCase().includes(city.toLowerCase()));
-
-                const selectedEvents = events.filter(isSelected);
-                const otherEvents = events.filter(e => !isSelected(e));
-
-                return (
-                  <>
-                    {/* Selected Cities Section */}
-                    {selectedEvents.length > 0 && (
-                      <div>
-                        {selectedCities.length > 0 && (
-                          <div className="flex items-center gap-4 mb-6">
-                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary/60 whitespace-nowrap">Near You</h3>
-                            <div className="h-px w-full bg-surface-200" />
-                          </div>
-                        )}
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-8">
-                          {selectedEvents.map(event => <EventCard key={event.id} event={event} />)}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Other Cities Section */}
-                    {otherEvents.length > 0 && (
-                      <div>
-                        <div className="flex items-center gap-4 mb-6">
-                          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-surface-400 whitespace-nowrap">Explore Other Cities</h3>
-                          <div className="h-px w-full bg-surface-200" />
-                        </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-8 opacity-90">
-                          {otherEvents.map(event => <EventCard key={event.id} event={event} />)}
-                        </div>
-                      </div>
-                    )}
-                  </>
-                );
-              })()
+            ) : popularEvents.length > 0 ? (
+              <ScrollRow>
+                {popularEvents.map(event => (
+                    <div key={event.id} className="flex w-[180px] md:w-[260px] snap-start shrink-0">
+                        <EventCard event={event} />
+                    </div>
+                ))}
+              </ScrollRow>
             ) : (
-              <div className="py-20 text-center">
-                <p className="text-surface-800/50 text-xl font-medium">No events found in this category.</p>
+                <p className="text-surface-800/50">Events will appear here as they gain views.</p>
+            )}
+          </div>
+        </section>
+
+        {/* Featured Events Section */}
+        <section className="mb-16">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-black text-foreground">Featured Events</h2>
+            <Link href="/events?sort=featured" className="text-primary font-bold hover:underline">See All</Link>
+          </div>
+          <div className="space-y-12">
+            {featLoading ? (
+              <div className="flex gap-4 md:gap-8 overflow-x-auto pb-4 snap-x no-scrollbar">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="min-w-[160px] md:min-w-[200px] aspect-[2/3] rounded-xl bg-surface-200 animate-pulse snap-start shrink-0" />
+                ))}
               </div>
+            ) : featuredEvents.length > 0 ? (
+              <ScrollRow>
+                {featuredEvents.map(event => (
+                    <div key={event.id} className="flex w-[180px] md:w-[260px] snap-start shrink-0">
+                        <EventCard event={event} />
+                    </div>
+                ))}
+              </ScrollRow>
+            ) : (
+                <p className="text-surface-800/50">Check back later for handpicked events.</p>
             )}
           </div>
         </section>

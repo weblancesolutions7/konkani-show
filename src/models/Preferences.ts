@@ -4,6 +4,7 @@ export interface IPreferences extends Document {
     tags: { id: string; name: string }[];
     categories: { id: string; name: string; count?: number }[];
     cities: string[];
+    languages: string[];
     featuredCategories: {
         id: string;
         category: string;
@@ -31,6 +32,7 @@ const PreferencesSchema = new Schema<IPreferences>(
             },
         ],
         cities: [{ type: String }],
+        languages: [{ type: String }],
         featuredCategories: [
             {
                 id: { type: String, required: true },
@@ -43,7 +45,10 @@ const PreferencesSchema = new Schema<IPreferences>(
             },
         ],
     },
-    { timestamps: true }
+    {
+        timestamps: true,
+        collection: 'preferences'
+    }
 );
 
 const PreferencesModel: Model<IPreferences> =

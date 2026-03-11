@@ -1,19 +1,23 @@
 
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { usePreferences } from '@/hooks/usePreferences';
+import { useUserLocation } from '@/hooks/useUserLocation';
 
 const Header = () => {
     const [searchQuery, setSearchQuery] = useState('');
-    const { preferences } = usePreferences();
     const [selectedCities, setSelectedCities] = useState<string[]>([]);
     const [citySearch, setCitySearch] = useState('');
+    const [isSearchingCity, setIsSearchingCity] = useState(false);
+    const [citySearchResults, setCitySearchResults] = useState<any[]>([]);
+    const [recentCities, setRecentCities] = useState<string[]>([]);
+    
     const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
+    const { location } = useUserLocation();
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -34,31 +38,101 @@ const Header = () => {
         };
     }, [isCityDropdownOpen]);
 
+    // Setup Recent Cities & Default location
     useEffect(() => {
         const savedCities = localStorage.getItem('selectedCities');
+        const savedRecent = localStorage.getItem('recentCities');
+        let hasSavedSelection = false;
+
         if (savedCities) {
             try {
                 const parsed = JSON.parse(savedCities);
                 if (Array.isArray(parsed) && parsed.length > 0) {
                     setSelectedCities(parsed);
+                    hasSavedSelection = true;
                 }
             } catch (e) {
                 console.error('Failed to parse saved cities');
             }
         }
+
+        if (savedRecent) {
+             try {
+                const parsed = JSON.parse(savedRecent);
+                if (Array.isArray(parsed)) setRecentCities(parsed);
+             } catch(e) {}
+        }
+
+        // Auto-select precise location if available AND user hasn't made a manual selection
+        if (!hasSavedSelection && location?.city && location.source === 'browser') {
+            setSelectedCities([location.city]);
+            localStorage.setItem('selectedCities', JSON.stringify([location.city]));
+            // Also add to recents
+            if (!savedRecent?.includes(location.city)) {
+                 const newRecents = [location.city].slice(0, 5);
+                 setRecentCities(newRecents);
+                 localStorage.setItem('recentCities', JSON.stringify(newRecents));
+            }
+            window.dispatchEvent(new Event('cityChange'));
+        }
+    }, [location]);
+
+    const searchDynamicCities = useCallback(async (query: string) => {
+        if (!query.trim()) {
+            setCitySearchResults([]);
+            return;
+        }
+        setIsSearchingCity(true);
+        try {
+            // Search specifically for cities/towns/features using Nominatim
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&featuretype=city,town,village&limit=5`);
+            if (response.ok) {
+                const data = await response.json();
+                setCitySearchResults(data || []);
+            }
+        } catch (error) {
+            console.error("City search error:", error);
+        } finally {
+            setIsSearchingCity(false);
+        }
     }, []);
 
-    const toggleCity = (city: string) => {
+    // Debounce for city search
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (citySearch.length > 2) {
+                searchDynamicCities(citySearch);
+            } else {
+                setCitySearchResults([]);
+            }
+        }, 400);
+        return () => clearTimeout(timeoutId);
+    }, [citySearch, searchDynamicCities]);
+
+    const toggleCity = (cityOrLocationObj: any) => {
+        const cityName = typeof cityOrLocationObj === 'string' 
+            ? cityOrLocationObj 
+            : (cityOrLocationObj.name || cityOrLocationObj.display_name.split(',')[0]);
+
         let newCities: string[];
-        if (selectedCities.includes(city)) {
-            // Keep at least one city selected if possible, or allow empty to show "All"
-            newCities = selectedCities.filter(c => c !== city);
+        if (selectedCities.includes(cityName)) {
+            newCities = selectedCities.filter(c => c !== cityName);
         } else {
-            newCities = [...selectedCities, city];
+            // For now, let's keep it to single city selection for simplicity and accuracy just dropping array structure if preferred,
+            // but keeping array for multi-select compatibility
+            newCities = [cityName]; // Override to single select
         }
 
         setSelectedCities(newCities);
         localStorage.setItem('selectedCities', JSON.stringify(newCities));
+        
+        // Update recents
+        const newRecents = [cityName, ...recentCities.filter(c => c !== cityName)].slice(0, 5);
+        setRecentCities(newRecents);
+        localStorage.setItem('recentCities', JSON.stringify(newRecents));
+
+        setCitySearch('');
+        setIsCityDropdownOpen(false);
         window.dispatchEvent(new Event('cityChange'));
     };
 
@@ -162,65 +236,111 @@ const Header = () => {
                                         <div className="relative group">
                                             <input
                                                 type="text"
-                                                placeholder="Search for your city..."
+                                                placeholder="Search for any city..."
                                                 value={citySearch}
                                                 onChange={(e) => setCitySearch(e.target.value)}
-                                                className="w-full pl-8 pr-3 py-1.5 bg-surface-50 border border-surface-100 rounded-lg focus:outline-none focus:border-primary/30 text-xs font-medium placeholder:text-surface-400 transition-all"
+                                                className="w-full pl-8 pr-8 py-2 bg-surface-50 border border-surface-100 rounded-lg focus:outline-none focus:border-primary/30 text-xs font-bold placeholder:text-surface-400 transition-all text-surface-900"
                                                 autoFocus
                                             />
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-surface-400 group-focus-within:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-400 group-focus-within:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                             </svg>
+                                            {isSearchingCity && (
+                                                <div className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                            )}
                                         </div>
                                     </div>
 
                                     <div className="max-h-64 overflow-y-auto">
-                                        {/* All Cities Option - Only show if not searching or if search matches "All" */}
-                                        {(!citySearch || 'all cities'.includes(citySearch.toLowerCase())) && (
-                                            <button
-                                                onClick={() => { setSelectedCities([]); localStorage.setItem('selectedCities', JSON.stringify([])); window.dispatchEvent(new Event('cityChange')); }}
-                                                className={`w-full text-left px-4 py-2.5 text-sm font-bold transition-colors flex items-center justify-between ${selectedCities.length === 0 ? 'text-primary bg-primary/5' : 'text-[#333333] hover:bg-surface-50'}`}
-                                            >
-                                                All Cities
-                                                {selectedCities.length === 0 && (
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-primary" viewBox="0 0 20 20" fill="currentColor">
-                                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                                    </svg>
+                                        
+                                        {/* Dynamic Search Results */}
+                                        {citySearch.length > 2 ? (
+                                            <div>
+                                                <div className="px-4 py-2 text-[10px] font-black tracking-widest text-surface-400 uppercase">Search Results</div>
+                                                {citySearchResults.map((result, idx) => {
+                                                    const cityName = result.name || result.display_name.split(',')[0];
+                                                    return (
+                                                    <button
+                                                        key={idx}
+                                                        onClick={() => toggleCity(result)}
+                                                        className="w-full text-left px-4 py-2.5 transition-colors hover:bg-surface-50 border-b border-surface-50 last:border-0"
+                                                    >
+                                                        <p className="text-sm font-bold text-[#333333]">{cityName}</p>
+                                                        <p className="text-[10px] text-surface-500 truncate">{result.display_name}</p>
+                                                    </button>
+                                                )})}
+                                                {!isSearchingCity && citySearchResults.length === 0 && (
+                                                    <div className="px-4 py-8 text-center text-xs font-medium text-surface-400">
+                                                        No cities found matching "{citySearch}"
+                                                    </div>
                                                 )}
-                                            </button>
-                                        )}
-
-                                        {(preferences?.cities || ['Mangalore', 'Udupi', 'Goa', 'Mumbai', 'Bangalore'])
-                                            .filter(city => city.toLowerCase().includes(citySearch.toLowerCase()))
-                                            .map((city) => (
+                                            </div>
+                                        ) : (
+                                            <>
+                                                {/* Use Current Location Shortcut */}
                                                 <button
-                                                    key={city}
-                                                    onClick={() => toggleCity(city)}
-                                                    className={`w-full text-left px-4 py-2.5 text-sm font-bold transition-colors flex items-center justify-between ${selectedCities.includes(city) ? 'text-primary bg-primary/5' : 'text-[#333333] hover:bg-surface-50'}`}
+                                                    onClick={() => {
+                                                        if (location?.city) toggleCity(location.city);
+                                                    }}
+                                                    className="w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-primary/5 transition-colors border-b border-surface-50 group"
                                                 >
-                                                    {city}
-                                                    {selectedCities.includes(city) && (
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    </svg>
+                                                    <div>
+                                                        <p className="text-xs font-black text-primary uppercase tracking-widest">Current Location</p>
+                                                        <p className="text-sm font-bold text-surface-900 group-hover:text-primary transition-colors">{location?.city || 'Detecting...'}</p>
+                                                    </div>
+                                                </button>
+
+                                                <button
+                                                    onClick={() => { setSelectedCities([]); localStorage.setItem('selectedCities', JSON.stringify([])); window.dispatchEvent(new Event('cityChange')); setIsCityDropdownOpen(false); }}
+                                                    className={`w-full text-left px-4 py-3 text-sm font-bold transition-colors flex items-center justify-between border-b border-surface-50 ${selectedCities.length === 0 ? 'text-primary bg-primary/5' : 'text-[#333333] hover:bg-surface-50'}`}
+                                                >
+                                                    Worldwide (All Cities)
+                                                    {selectedCities.length === 0 && (
                                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-primary" viewBox="0 0 20 20" fill="currentColor">
                                                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                                         </svg>
                                                     )}
                                                 </button>
-                                            ))}
 
-                                        {(preferences?.cities || ['Mangalore', 'Udupi', 'Goa', 'Mumbai', 'Bangalore']).filter(city => city.toLowerCase().includes(citySearch.toLowerCase())).length === 0 && citySearch && (
-                                            <div className="px-4 py-8 text-center">
-                                                <p className="text-xs font-medium text-surface-400">No cities found matching "{citySearch}"</p>
-                                            </div>
+                                                {/* Recently Selected Cities */}
+                                                {recentCities.length > 0 && (
+                                                    <div className="py-2">
+                                                        <div className="px-4 py-1 text-[10px] font-black tracking-widest text-surface-400 uppercase">Recent</div>
+                                                        {recentCities.map((city) => (
+                                                            <button
+                                                                key={city}
+                                                                onClick={() => toggleCity(city)}
+                                                                className={`w-full text-left px-4 py-2 text-sm font-bold transition-colors flex items-center justify-between ${selectedCities.includes(city) ? 'text-primary bg-primary/5' : 'text-[#333333] hover:bg-surface-50 border-white'}`}
+                                                            >
+                                                                {city}
+                                                                {selectedCities.includes(city) && (
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                                                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                                    </svg>
+                                                                )}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </>
                                         )}
                                     </div>
                                 </div>
                             )}
                         </div>
 
-                        <button className="relative px-6 py-2.5 bg-surface-50 text-primary text-[14px] font-black rounded-xl hover:bg-surface-100 transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.3)] active:scale-95 group overflow-hidden">
-                            <span className="relative z-10">Sign In</span>
+
+                        <Link 
+                            href="/submit-event" 
+                            className="relative px-6 py-2.5 bg-surface-50 text-primary text-[14px] font-black rounded-xl hover:bg-surface-100 transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.3)] active:scale-95 group overflow-hidden hidden sm:block"
+                        >
+                            <span className="relative z-10">List Your Show</span>
                             <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/40 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                        </button>
+                        </Link>
 
                         {/* Mobile Search Toggle */}
                         <button className="md:hidden p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-all">
@@ -244,27 +364,8 @@ const Header = () => {
                                 </Link>
                             </li>
                         ))}
-                        <li className="h-full">
-                            <Link href="/submit-event" className="relative h-full flex items-center text-[13px] font-bold text-white/80 hover:text-white transition-all group">
-                                List Your Show
-                                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full" />
-                            </Link>
-                        </li>
-                        <li className="h-full">
-                            <Link href="/admin" className="relative h-full flex items-center text-[13px] font-bold text-white/80 hover:text-white transition-all group">
-                                Admin Panel
-                                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full" />
-                            </Link>
-                        </li>
                     </ul>
 
-                    <ul className="flex items-center gap-8 text-[11px] font-black text-white/70 uppercase tracking-[0.1em]">
-                        <li>
-                            <Link href="/" className="hover:text-white transition-colors px-1">
-                                Offers
-                            </Link>
-                        </li>
-                    </ul>
                 </div>
             </nav>
 

@@ -77,6 +77,10 @@ export async function POST() {
                 date: 'March 15, 2026',
                 time: '6:30 PM',
                 location: 'Don Bosco Hall, Mangalore',
+                locationCoords: {
+                    type: 'Point',
+                    coordinates: [74.8430, 12.8711], // Mangalore
+                },
                 category: 'Drama',
                 tags: ['Comedy', 'Live', 'Family'],
                 featureImage:
@@ -97,6 +101,10 @@ export async function POST() {
                 date: 'April 02, 2026',
                 time: '7:00 PM',
                 location: 'Town Hall, Mangalore',
+                locationCoords: {
+                    type: 'Point',
+                    coordinates: [74.8420, 12.8700], // Mangalore
+                },
                 category: 'Musical',
                 tags: ['Unplugged', 'Live'],
                 featureImage:
@@ -113,6 +121,10 @@ export async function POST() {
                 date: 'April 20, 2026',
                 time: '5:00 PM',
                 location: 'Kala Mandir, Udupi',
+                locationCoords: {
+                    type: 'Point',
+                    coordinates: [74.7421, 13.3409], // Udupi
+                },
                 category: 'Comedy',
                 tags: ['Comedy', 'Live', 'Family'],
                 featureImage:

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import AdminTable from '@/components/admin/AdminTable';
 import { API_ROUTES } from '@/config/api';
 import { Event } from '@/types';
+import WorldLocationPicker, { LocationData } from '@/components/event/WorldLocationPicker';
 
 type AdminTab = 'PENDING' | 'APPROVED' | 'DELETED';
 
@@ -15,7 +16,19 @@ function EditModal({ event, onClose, onSave }: { event: Event; onClose: () => vo
     const [description, setDescription] = useState(event.description);
     const [date, setDate] = useState(event.date);
     const [time, setTime] = useState(event.time);
-    const [location, setLocation] = useState(event.location);
+    
+    // Initialize WorldLocationData from existing Event schema
+    const [locationData, setLocationData] = useState<LocationData | null>(() => {
+        if (event.locationDetails) {
+            return {
+                ...event.locationDetails,
+                lat: event.locationCoords ? event.locationCoords.coordinates[1] : 12.9141,
+                lng: event.locationCoords ? event.locationCoords.coordinates[0] : 74.8560
+            };
+        }
+        return null;
+    });
+
     const [category, setCategory] = useState(event.category);
     const [entry, setEntry] = useState(event.entry || '');
     const [meetingLink, setMeetingLink] = useState(event.meetingLink || '');
@@ -24,6 +37,14 @@ function EditModal({ event, onClose, onSave }: { event: Event; onClose: () => vo
     const handleSave = async () => {
         setSaving(true);
         try {
+            // Create fallback display string
+            const displayParts = [];
+            if (locationData?.venueAddress) displayParts.push(locationData.venueAddress);
+            if (locationData?.city) displayParts.push(locationData.city);
+            if (locationData?.state) displayParts.push(locationData.state);
+            if (locationData?.country) displayParts.push(locationData.country);
+            const locationString = displayParts.join(', ') || event.location;
+
             const response = await fetch(API_ROUTES.EVENT_BY_ID(event.id), {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -32,7 +53,12 @@ function EditModal({ event, onClose, onSave }: { event: Event; onClose: () => vo
                     description,
                     date,
                     time,
-                    location,
+                    location: locationString,
+                    locationDetails: locationData,
+                    locationCoords: locationData ? {
+                        type: 'Point',
+                        coordinates: [locationData.lng, locationData.lat]
+                    } : undefined,
                     category,
                     entry,
                     meetingLink,
@@ -76,9 +102,12 @@ function EditModal({ event, onClose, onSave }: { event: Event; onClose: () => vo
                             <input type="text" value={time} onChange={(e) => setTime(e.target.value)} className="w-full p-4 bg-surface-50 rounded-xl border-2 border-transparent focus:border-primary outline-none font-bold" />
                         </div>
                     </div>
-                    <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-widest text-surface-800/40">Location</label>
-                        <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} className="w-full p-4 bg-surface-50 rounded-xl border-2 border-transparent focus:border-primary outline-none font-bold" />
+                    <div className="space-y-4">
+                        <label className="text-xs font-black uppercase tracking-widest text-surface-800/40">Event Location Details</label>
+                        <WorldLocationPicker 
+                            value={locationData || undefined}
+                            onChange={(data) => setLocationData(data)}
+                        />
                     </div>
                     <div className="space-y-2">
                         <label className="text-xs font-black uppercase tracking-widest text-surface-800/40">Category</label>
@@ -116,6 +145,8 @@ function EditModal({ event, onClose, onSave }: { event: Event; onClose: () => vo
         </div>
     );
 }
+
+import AdminSidebar from '@/components/admin/AdminSidebar';
 
 export default function AdminDashboard() {
     const [activeTab, setActiveTab] = useState<AdminTab>('PENDING');
@@ -217,71 +248,58 @@ export default function AdminDashboard() {
     };
 
     return (
-        <main className="min-h-screen bg-surface-100 py-12 px-6">
-            <div className="max-w-7xl mx-auto">
-                <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-                    <div>
-                        <h1 className="text-3xl font-black text-foreground">Mandd Sobhann Dashboard</h1>
-                        <p className="text-surface-800/60 font-medium whitespace-nowrap">Manage events, preferences, and community shows.</p>
-                    </div>
-                    <div className="flex gap-4 flex-wrap">
-                        <button
-                            onClick={handleSeedData}
-                            className="px-6 py-3 bg-amber-50 border border-amber-200 text-amber-700 rounded-xl font-bold hover:shadow-md transition-all"
-                        >
-                            🌱 Seed Data
-                        </button>
-                        <Link href="/admin/preferences" className="px-6 py-3 bg-surface-50 border border-surface-200 rounded-xl font-bold hover:shadow-md transition-all">
-                            Manage Preferences
-                        </Link>
-                        <Link href="/submit-event" className="px-6 py-3 bg-primary text-white rounded-xl font-bold shadow-lg hover:bg-primary-dark transition-all">
-                            Create Event
-                        </Link>
-                    </div>
-                </header>
+        <div className="flex min-h-screen bg-surface-100">
+            <AdminSidebar onSeedData={handleSeedData} />
+            
+            <main className="flex-1 py-12 px-10">
+                <div className="max-w-6xl mx-auto">
+                    <header className="mb-10">
+                        <h1 className="text-3xl font-black text-foreground">Events Dashboard</h1>
+                        <p className="text-surface-800/60 font-medium">Approve, edit, or remove community events and shows.</p>
+                    </header>
 
-                <section className="bg-surface-50 rounded-3xl p-8 shadow-premium border border-surface-200">
-                    <div className="flex border-b border-surface-100 mb-8 overflow-x-auto">
-                        {(['PENDING', 'APPROVED', 'DELETED'] as AdminTab[]).map(tab => (
-                            <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab)}
-                                className={`px-8 py-4 font-black transition-all border-b-4 ${activeTab === tab
-                                    ? 'border-primary text-primary'
-                                    : 'border-transparent text-surface-800/40 hover:text-surface-800'
-                                    }`}
-                            >
-                                {tab}
-                            </button>
-                        ))}
-                    </div>
-
-                    {loading ? (
-                        <div className="space-y-4">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                                <div key={i} className="h-16 w-full bg-surface-100 animate-pulse rounded-lg" />
+                    <section className="bg-surface-50 rounded-3xl p-8 shadow-premium border border-surface-200">
+                        <div className="flex border-b border-surface-100 mb-8 overflow-x-auto">
+                            {(['PENDING', 'APPROVED', 'DELETED'] as AdminTab[]).map(tab => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab)}
+                                    className={`px-8 py-4 font-black transition-all border-b-4 ${activeTab === tab
+                                        ? 'border-primary text-primary'
+                                        : 'border-transparent text-surface-800/40 hover:text-surface-800'
+                                        }`}
+                                >
+                                    {tab}
+                                </button>
                             ))}
                         </div>
-                    ) : (
-                        <AdminTable
-                            events={events}
-                            onApprove={handleApprove}
-                            onReject={handleReject}
-                            onDelete={handleDelete}
-                            onEdit={handleEdit}
-                        />
-                    )}
-                </section>
-            </div>
 
-            {/* Edit Modal */}
-            {editingEvent && (
-                <EditModal
-                    event={editingEvent}
-                    onClose={() => setEditingEvent(null)}
-                    onSave={() => fetchEvents(activeTab)}
-                />
-            )}
-        </main>
+                        {loading ? (
+                            <div className="space-y-4">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                    <div key={i} className="h-16 w-full bg-surface-100 animate-pulse rounded-lg" />
+                                ))}
+                            </div>
+                        ) : (
+                            <AdminTable
+                                events={events}
+                                onApprove={handleApprove}
+                                onReject={handleReject}
+                                onDelete={handleDelete}
+                                onEdit={handleEdit}
+                            />
+                        )}
+                        {/* Edit Modal */}
+                        {editingEvent && (
+                            <EditModal
+                                event={editingEvent}
+                                onClose={() => setEditingEvent(null)}
+                                onSave={() => fetchEvents(activeTab)}
+                            />
+                        )}
+                    </section>
+                </div>
+            </main>
+        </div>
     );
 }

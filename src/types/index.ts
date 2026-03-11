@@ -25,6 +25,7 @@ export interface Preferences {
   tags: Tag[];
   categories: Category[];
   cities: string[];
+  languages: string[];
   featuredCategories: FeaturedCategory[];
 }
 
@@ -38,7 +39,21 @@ export interface Event {
   date: string;
   time: string;
   location: string;
+  locationDetails?: {
+    venueAddress: string;
+    city: string;
+    state: string;
+    country: string;
+    zipCode: string;
+  };
+  locationCoords?: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
   category: string;
+  language?: string;
+  price?: number;
+  currency?: string;
   tags: string[];
   featureImage: string;
   gallery: string[];

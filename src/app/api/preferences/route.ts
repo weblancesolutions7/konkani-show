@@ -25,6 +25,7 @@ export async function GET() {
                     { id: '4', name: 'Workshop', count: 0 },
                 ],
                 cities: ['Mangalore', 'Udupi', 'Goa', 'Mumbai', 'Bangalore'],
+                languages: ['Konkani', 'English', 'Hindi', 'Kannada', 'Marathi'],
                 featuredCategories: [
                     {
                         id: '1',
@@ -64,14 +65,19 @@ export async function GET() {
             return acc;
         }, {} as Record<string, number>);
 
-        // Dynamically fetch unique cities from APPROVED events
+        // Dynamically fetch unique cities and languages from APPROVED events
         const eventCities = await EventModel.distinct('location', { status: 'APPROVED' });
+        const eventLanguages = await EventModel.distinct('language', { status: 'APPROVED' });
 
-        // Merge event cities with preferences.cities, ensuring uniqueness
+        // Merge event cities/languages with preferences, ensuring uniqueness
         if (preferences) {
             const existingCities = preferences.cities || [];
             const mergedCities = Array.from(new Set([...existingCities, ...eventCities]));
             preferences.cities = mergedCities.sort();
+
+            const existingLanguages = preferences.languages || [];
+            const mergedLanguages = Array.from(new Set([...existingLanguages, ...eventLanguages])).filter(Boolean);
+            preferences.languages = mergedLanguages.sort() as string[];
         }
 
         // Update the preferences categories array with dynamic counts

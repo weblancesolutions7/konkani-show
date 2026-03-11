@@ -1,0 +1,27 @@
+﻿.next/dev/types/validator.ts(153,31): error TS2344: Type 'typeof import("C:/Users/StubBorn/Desktop/WebLance/konkani-show/src/app/api/events/[id]/view/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/events/[id]/view">'.
+  Types of property 'POST' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ error: string; }> | NextResponse<{ success: boolean; views: number; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+.next/types/validator.ts(153,31): error TS2344: Type 'typeof import("C:/Users/StubBorn/Desktop/WebLance/konkani-show/src/app/api/events/[id]/view/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/events/[id]/view">'.
+  Types of property 'POST' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ error: string; }> | NextResponse<{ success: boolean; views: number; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+src/app/api/events/route.ts(123,37): error TS2552: Cannot find name 'tag'. Did you mean 'tags'?
+src/components/event/LocationPicker.tsx(12,30): error TS2345: Argument of type '() => Promise<(handlers: LeafletEventHandlerFnMap) => Map>' is not assignable to parameter of type 'DynamicOptions<LeafletEventHandlerFnMap> | Loader<LeafletEventHandlerFnMap>'.
+  Type '() => Promise<(handlers: LeafletEventHandlerFnMap) => Map>' is not assignable to type '() => LoaderComponent<LeafletEventHandlerFnMap>'.
+    Type 'Promise<(handlers: LeafletEventHandlerFnMap) => Map>' is not assignable to type 'LoaderComponent<LeafletEventHandlerFnMap>'.
+      Type '(handlers: LeafletEventHandlerFnMap) => Map' is not assignable to type 'ComponentType<LeafletEventHandlerFnMap> | ComponentModule<LeafletEventHandlerFnMap>'.
+        Type '(handlers: LeafletEventHandlerFnMap) => Map' is not assignable to type 'FunctionComponent<LeafletEventHandlerFnMap>'.
+          Type 'Map' is not assignable to type 'ReactNode | Promise<ReactNode>'.
+src/components/event/LocationPicker.tsx(16,5): error TS2349: This expression is not callable.
+  Not all constituents of type 'ComponentType<LeafletEventHandlerFnMap>' are callable.
+    Type 'ComponentClass<LeafletEventHandlerFnMap, any>' has no call signatures.
+src/components/event/LocationPicker.tsx(17,15): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/models/Event.ts(122,5): error TS2349: This expression is not callable.
+  Type 'SaveOptions' has no call signatures.

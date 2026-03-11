@@ -29,7 +29,10 @@ const RegistrationSchema = new Schema<IRegistration>(
             default: 'CONFIRMED',
         },
     },
-    { timestamps: true }
+    { 
+        timestamps: true,
+        collection: 'registrations'
+    }
 );
 
 const RegistrationModel: Model<IRegistration> =

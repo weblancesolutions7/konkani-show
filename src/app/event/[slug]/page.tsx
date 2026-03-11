@@ -1,4 +1,3 @@
-
 import { Metadata, ResolvingMetadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
@@ -6,6 +5,7 @@ import { CONFIG } from '@/config/api';
 import TagChip from '@/components/ui/TagChip';
 import CalendarButtons from '@/components/event/CalendarButtons';
 import RegisterButton from '@/components/event/RegisterButton';
+import ViewTracker from '@/components/event/ViewTracker';
 import { Event } from '@/types';
 
 interface Props {
@@ -66,6 +66,8 @@ export default async function EventPage({ params }: Props) {
 
     return (
         <main className="min-h-screen bg-surface-50">
+            <ViewTracker eventId={event.id} />
+
             {/* Visual Header */}
             <div className="relative w-full h-[50vh] md:h-[60vh]">
                 <Image
