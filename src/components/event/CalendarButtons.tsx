@@ -101,19 +101,19 @@ const CalendarButtons: React.FC<CalendarButtonsProps> = ({ event }) => {
         <div className="flex flex-wrap gap-3">
             <button
                 onClick={() => window.open(generateGoogleLink(), '_blank')}
-                className="flex-1 min-w-[140px] flex items-center justify-center gap-2 py-2 px-4 rounded-lg border-2 border-surface-200 font-bold hover:border-primary transition-colors hover:text-primary bg-white shadow-sm"
+                className="flex-1 min-w-[140px] flex items-center justify-center gap-2 py-2 px-4  border-2 border-surface-200 font-bold hover:border-primary transition-colors hover:text-primary bg-white shadow-sm"
             >
                 <span className="text-xs">Google</span>
             </button>
             <button
                 onClick={() => window.open(generateOutlookLink(), '_blank')}
-                className="flex-1 min-w-[140px] flex items-center justify-center gap-2 py-2 px-4 rounded-lg border-2 border-surface-200 font-bold hover:border-primary transition-colors hover:text-primary bg-white shadow-sm"
+                className="flex-1 min-w-[140px] flex items-center justify-center gap-2 py-2 px-4  border-2 border-surface-200 font-bold hover:border-primary transition-colors hover:text-primary bg-white shadow-sm"
             >
                 <span className="text-xs">Outlook</span>
             </button>
             <button
                 onClick={downloadICS}
-                className="flex-1 min-w-[140px] flex items-center justify-center gap-2 py-2 px-4 rounded-lg border-2 border-surface-200 font-bold hover:border-primary transition-colors hover:text-primary bg-white shadow-sm"
+                className="flex-1 min-w-[140px] flex items-center justify-center gap-2 py-2 px-4  border-2 border-surface-200 font-bold hover:border-primary transition-colors hover:text-primary bg-white shadow-sm"
             >
                 <span className="text-xs">Apple / ICS</span>
             </button>
@@ -122,3 +122,4 @@ const CalendarButtons: React.FC<CalendarButtonsProps> = ({ event }) => {
 };
 
 export default CalendarButtons;
+

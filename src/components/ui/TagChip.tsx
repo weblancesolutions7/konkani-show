@@ -1,9 +1,9 @@
-
-import React from 'react';
+import Link from 'next/link';
 
 
 interface TagChipProps {
     label: string;
+    href?: string;
     variant?: 'primary' | 'secondary' | 'outline';
     className?: string;
     onClick?: () => void;
@@ -13,6 +13,7 @@ interface TagChipProps {
 
 const TagChip: React.FC<TagChipProps> = ({ 
     label, 
+    href,
     variant = 'outline', 
     className = '', 
     onClick,
@@ -32,7 +33,7 @@ const TagChip: React.FC<TagChipProps> = ({
         }
     };
 
-    const classes = `inline-flex items-center px-4 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 ${variants[mode][variant]} ${className}`;
+    const classes = `inline-flex items-center px-4 py-1.5  text-xs font-semibold border transition-all duration-200 ${variants[mode][variant]} ${className}`;
 
     const content = (
         <>
@@ -40,6 +41,14 @@ const TagChip: React.FC<TagChipProps> = ({
             {label}
         </>
     );
+
+    if (href) {
+        return (
+            <Link href={href} className={classes}>
+                {content}
+            </Link>
+        );
+    }
 
     if (onClick) {
         return (
@@ -57,3 +66,4 @@ const TagChip: React.FC<TagChipProps> = ({
 };
 
 export default TagChip;
+

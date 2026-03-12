@@ -1,4 +1,5 @@
 import { Metadata, ResolvingMetadata } from 'next';
+import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { CONFIG } from '@/config/api';
@@ -44,14 +45,14 @@ export async function generateMetadata(
             description: event.description,
             url: `https://konkanishow.com/event/${slug}`,
             siteName: CONFIG.SITE_NAME,
-            images: [{ url: event.featureImage }],
+            images: [{ url: event.detailImage || event.featureImage }],
             type: 'article',
         },
         twitter: {
             card: 'summary_large_image',
             title: event.title,
             description: event.description,
-            images: [event.featureImage],
+            images: [event.detailImage || event.featureImage],
         },
     };
 }
@@ -68,10 +69,23 @@ export default async function EventPage({ params }: Props) {
         <main className="min-h-screen bg-surface-50">
             <ViewTracker eventId={event.id} />
 
+            {/* Breadcrumbs & Navigation */}
+            <div className="bg-white border-b border-surface-200">
+                <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-surface-400 text-[10px] font-black uppercase tracking-widest">
+                        <Link href="/" className="hover:text-primary">Home</Link>
+                        <span>/</span>
+                        <Link href="/events" className="hover:text-primary">Events</Link>
+                        <span>/</span>
+                        <span className="text-surface-900 line-clamp-1">{event.title}</span>
+                    </div>
+                </div>
+            </div>
+
             {/* Visual Header */}
             <div className="relative w-full h-[50vh] md:h-[60vh]">
                 <Image
-                    src={event.featureImage}
+                    src={event.detailImage || event.featureImage}
                     alt={event.title}
                     fill
                     priority
@@ -81,8 +95,19 @@ export default async function EventPage({ params }: Props) {
 
                 <div className="absolute bottom-10 left-0 right-0 max-w-7xl mx-auto px-6">
                     <div className="flex flex-wrap gap-2 mb-4">
-                        <TagChip label={event.category} variant="primary" />
-                        {event.tags.map(tag => <TagChip key={tag} label={tag} className="bg-white/10 text-white border-white/20" />)}
+                        <TagChip 
+                            label={event.category} 
+                            variant="primary" 
+                            href={`/events?category=${encodeURIComponent(event.category)}`}
+                        />
+                        {event.tags.map(tag => (
+                            <TagChip 
+                                key={tag} 
+                                label={tag} 
+                                href={`/events?tag=${encodeURIComponent(tag)}`}
+                                className="bg-white/10 text-white border-white/20" 
+                            />
+                        ))}
                     </div>
                     <h1 className="text-4xl md:text-6xl font-black text-white mb-2 leading-tight">
                         {event.title}
@@ -113,6 +138,14 @@ export default async function EventPage({ params }: Props) {
             <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
                 {/* Main Content */}
                 <div className="lg:col-span-2 space-y-10 focus:outline-none">
+                    <div className="flex items-center gap-4 mb-2">
+                         <Link href="/events" className="flex items-center gap-2 text-xs font-black text-primary uppercase tracking-widest hover:translate-x-[-4px] transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-4 h-4">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                            </svg>
+                            Back to Events
+                         </Link>
+                    </div>
                     <section>
                         <h2 className="text-2xl font-black mb-4">About the Event</h2>
                         <p className="text-surface-800 leading-relaxed text-lg whitespace-pre-wrap">
@@ -126,7 +159,7 @@ export default async function EventPage({ params }: Props) {
                             <div className="grid grid-cols-2 gap-4">
                                 {event.gallery.map((img, i) => (
                                     <div key={i} className="relative aspect-video rounded-xl overflow-hidden shadow-card group">
-                                        <Image src={img} alt={`Gallery ${i}`} fill className="object-cover transition-transform group-hover:scale-105" />
+                                        <Image src={img} alt={`Gallery ${i}`} fill className="object-cover" />
                                     </div>
                                 ))}
                             </div>

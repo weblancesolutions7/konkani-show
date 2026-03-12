@@ -15,7 +15,7 @@ export default function RegisterButton({ event }: RegisterButtonProps) {
         <>
             <button
                 onClick={() => setIsModalOpen(true)}
-                className="w-full py-4 bg-primary text-white font-black rounded-xl shadow-lg hover:bg-primary-dark transition-all transform active:scale-95"
+                className="w-full py-4 bg-primary text-white font-black  shadow-lg hover:bg-primary-dark transition-all transform active:scale-95"
             >
                 Register for Event
             </button>
@@ -27,3 +27,4 @@ export default function RegisterButton({ event }: RegisterButtonProps) {
         </>
     );
 }
+

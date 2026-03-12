@@ -14,7 +14,9 @@ export default function SubmitEventPage() {
     const [phone, setPhone] = useState('');
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [imageUrl, setImageUrl] = useState('');
+    const [detailImageUrl, setDetailImageUrl] = useState('');
     const [uploading, setUploading] = useState(false);
+    const [detailUploading, setDetailUploading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 
     // Form state
@@ -30,11 +32,37 @@ export default function SubmitEventPage() {
     const [entry, setEntry] = useState('');
     const [meetingLink, setMeetingLink] = useState('');
 
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const getImageDimensions = (file: File): Promise<{ width: number; height: number }> => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+                resolve({ width: img.width, height: img.height });
+            };
+            img.src = URL.createObjectURL(file);
+        });
+    };
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'card' | 'detail') => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        setUploading(true);
+        // Validation Rules
+        const dimensions = await getImageDimensions(file);
+        if (type === 'card') {
+            if (dimensions.width !== 800 || dimensions.height !== 1200) {
+                alert(`Invalid dimensions: ${dimensions.width}x${dimensions.height}. Card image must be exactly 800x1200 px.`);
+                return;
+            }
+        } else {
+            if (dimensions.width !== 1920 || dimensions.height !== 1080) {
+                alert(`Invalid dimensions: ${dimensions.width}x${dimensions.height}. Detailed screen image must be exactly 1920x1080 px.`);
+                return;
+            }
+        }
+
+        if (type === 'card') setUploading(true);
+        else setDetailUploading(true);
+
         const formData = new FormData();
         formData.append('file', file);
         formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'ml_default');
@@ -46,20 +74,19 @@ export default function SubmitEventPage() {
             );
             const data = await response.json();
             if (data.secure_url) {
-                setImageUrl(data.secure_url);
+                if (type === 'card') setImageUrl(data.secure_url);
+                else setDetailImageUrl(data.secure_url);
             }
         } catch (error) {
             console.error('Upload failed:', error);
-            const reader = new FileReader();
-            reader.onloadend = () => setImageUrl(reader.result as string);
-            reader.readAsDataURL(file);
+            alert('Upload failed. Please try again.');
         } finally {
-            setUploading(false);
+            if (type === 'card') setUploading(false);
+            else setDetailUploading(false);
         }
     };
 
     const handleAuthComplete = (otp: string) => {
-        console.log('OTP Verified:', otp);
         setStep('FORM');
     };
 
@@ -108,6 +135,7 @@ export default function SubmitEventPage() {
                 category: category || preferences?.categories[0]?.name || 'Drama',
                 tags: selectedTags,
                 featureImage: imageUrl,
+                detailImage: detailImageUrl,
                 gallery: [],
                 entry,
                 meetingLink,
@@ -130,6 +158,7 @@ export default function SubmitEventPage() {
             setCategory('');
             setSelectedTags([]);
             setImageUrl('');
+            setDetailImageUrl('');
             setEntry('');
             setMeetingLink('');
             setStep('SUCCESS');
@@ -145,13 +174,13 @@ export default function SubmitEventPage() {
         return (
             <div className="min-h-[90vh] flex items-center justify-center bg-white p-6 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-5">
-                    <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary rounded-full blur-3xl animate-pulse" />
-                    <div className="absolute top-1/2 -right-24 w-64 h-64 bg-accent rounded-full blur-3xl animate-pulse delay-1000" />
+                    <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary  blur-3xl animate-pulse" />
+                    <div className="absolute top-1/2 -right-24 w-64 h-64 bg-accent  blur-3xl animate-pulse delay-1000" />
                 </div>
 
                 <div className="max-w-md w-full relative">
                     <div className="p-10 bg-white rounded-[2.5rem] shadow-premium border border-surface-200 relative z-10 backdrop-blur-sm">
-                        <div className="w-16 h-16 bg-primary/10 text-primary rounded-2xl flex items-center justify-center text-3xl mb-8 mx-auto transform -rotate-6">
+                        <div className="w-16 h-16 bg-primary/10 text-primary  flex items-center justify-center text-3xl mb-8 mx-auto transform -rotate-6">
                             🔐
                         </div>
 
@@ -172,7 +201,7 @@ export default function SubmitEventPage() {
                                         placeholder="00000 00000"
                                         value={phone}
                                         onChange={(e) => setPhone(e.target.value)}
-                                        className="w-full pl-16 pr-5 py-4 bg-surface-50 border-2 border-surface-100 rounded-2xl focus:border-primary focus:bg-white outline-none transition-all font-bold text-lg shadow-inner group-hover:border-surface-200"
+                                        className="w-full pl-16 pr-5 py-4 bg-surface-50 border-2 border-surface-100  focus:border-primary focus:bg-white outline-none transition-all font-bold text-lg shadow-inner group-hover:border-surface-200"
                                     />
                                 </div>
                             </div>
@@ -180,7 +209,7 @@ export default function SubmitEventPage() {
                             <button
                                 onClick={() => { }}
                                 disabled={!phone}
-                                className="w-full py-4.5 bg-primary text-white font-bold rounded-2xl shadow-lg hover:bg-primary-dark transition-all disabled:opacity-50 disabled:grayscale transform active:scale-95 flex items-center justify-center gap-2 group"
+                                className="w-full py-4.5 bg-primary text-white font-bold  shadow-lg hover:bg-primary-dark transition-all disabled:opacity-50 disabled:grayscale transform active:scale-95 flex items-center justify-center gap-2 group"
                             >
                                 <span>Send OTP</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -216,13 +245,13 @@ export default function SubmitEventPage() {
             <div className="min-h-[80vh] flex items-center justify-center bg-white p-6">
                 <div className="max-w-xl w-full text-center relative">
                     <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-                        <div className="absolute top-1/4 left-1/4 w-3 h-3 bg-primary rounded-full animate-bounce" />
-                        <div className="absolute top-1/3 right-1/4 w-2 h-2 bg-accent rounded-full animate-bounce delay-100" />
-                        <div className="absolute bottom-1/4 left-1/2 w-2 h-2 bg-emerald-500 rounded-full animate-bounce delay-300" />
+                        <div className="absolute top-1/4 left-1/4 w-3 h-3 bg-primary  animate-bounce" />
+                        <div className="absolute top-1/3 right-1/4 w-2 h-2 bg-accent  animate-bounce delay-100" />
+                        <div className="absolute bottom-1/4 left-1/2 w-2 h-2 bg-emerald-500  animate-bounce delay-300" />
                     </div>
 
                     <div className="p-12 md:p-16 bg-white rounded-[3rem] shadow-premium border border-surface-200">
-                        <div className="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-5xl mx-auto mb-10 shadow-inner animate-in zoom-in duration-500">
+                        <div className="w-24 h-24 bg-emerald-100 text-emerald-600  flex items-center justify-center text-5xl mx-auto mb-10 shadow-inner animate-in zoom-in duration-500">
                             🎉
                         </div>
                         <h1 className="text-4xl md:text-5xl font-black mb-4 tracking-tight">Show&apos;s on the Way!</h1>
@@ -233,13 +262,13 @@ export default function SubmitEventPage() {
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <button
                                 onClick={() => window.location.href = '/'}
-                                className="px-10 py-4 bg-primary text-white font-bold rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all active:scale-95"
+                                className="px-10 py-4 bg-primary text-white font-bold  shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all active:scale-95"
                             >
                                 Back to Main App
                             </button>
                             <button
                                 onClick={() => setStep('FORM')}
-                                className="px-10 py-4 bg-surface-50 text-surface-900 border border-surface-200 font-bold rounded-2xl hover:bg-white hover:border-primary transition-all active:scale-95"
+                                className="px-10 py-4 bg-surface-50 text-surface-900 border border-surface-200 font-bold  hover:bg-white hover:border-primary transition-all active:scale-95"
                             >
                                 Submit Another
                             </button>
@@ -255,16 +284,16 @@ export default function SubmitEventPage() {
             <div className="max-w-5xl mx-auto">
                 <header className="mb-16 text-center md:text-left flex flex-col md:flex-row md:items-end justify-between gap-8">
                     <div className="max-w-2xl">
-                        <div className="inline-block px-4 py-1.5 bg-primary/5 text-primary text-[11px] font-black uppercase tracking-[0.2em] rounded-full mb-4 border border-primary/10">
+                        <div className="inline-block px-4 py-1.5 bg-primary/5 text-primary text-[11px] font-black uppercase tracking-[0.2em]  mb-4 border border-primary/10">
                             Partner Portal
                         </div>
                         <h1 className="text-4xl md:text-6xl font-black mb-4 tracking-tighter">Submit Your Show</h1>
                         <p className="text-surface-800/50 text-lg font-medium">Create a stunning listing for your upcoming Konkani event.</p>
                     </div>
 
-                    <div className="flex items-center gap-3 bg-surface-50 p-2 rounded-2xl border border-surface-200 self-center md:self-auto shadow-sm">
-                        <div className="px-6 py-2 bg-white text-primary text-xs font-black uppercase tracking-widest rounded-xl shadow-sm">Step 2 of 2</div>
-                        <div className="w-12 h-1.5 bg-primary rounded-full" />
+                    <div className="flex items-center gap-3 bg-surface-50 p-2  border border-surface-200 self-center md:self-auto shadow-sm">
+                        <div className="px-6 py-2 bg-white text-primary text-xs font-black uppercase tracking-widest  shadow-sm">Step 2 of 2</div>
+                        <div className="w-12 h-1.5 bg-primary " />
                     </div>
                 </header>
 
@@ -287,7 +316,7 @@ export default function SubmitEventPage() {
                                             placeholder="e.g. Traditional Konkani Drama Night"
                                             value={title}
                                             onChange={(e) => setTitle(e.target.value)}
-                                            className="w-full p-5 bg-surface-50 rounded-2xl outline-none focus:bg-white focus:ring-4 focus:ring-primary/5 border-2 border-transparent focus:border-primary transition-all font-bold text-lg"
+                                            className="w-full p-5 bg-surface-50  outline-none focus:bg-white focus:ring-4 focus:ring-primary/5 border-2 border-transparent focus:border-primary transition-all font-bold text-lg"
                                         />
                                     </div>
 
@@ -299,7 +328,7 @@ export default function SubmitEventPage() {
                                             value={description}
                                             onChange={(e) => setDescription(e.target.value)}
                                             rows={4}
-                                            className="w-full p-5 bg-surface-50 rounded-2xl outline-none focus:bg-white focus:ring-4 focus:ring-primary/5 border-2 border-transparent focus:border-primary transition-all font-bold resize-none"
+                                            className="w-full p-5 bg-surface-50  outline-none focus:bg-white focus:ring-4 focus:ring-primary/5 border-2 border-transparent focus:border-primary transition-all font-bold resize-none"
                                         />
                                     </div>
 
@@ -312,7 +341,7 @@ export default function SubmitEventPage() {
                                                 min={new Date().toISOString().split('T')[0]}
                                                 value={date}
                                                 onChange={(e) => setDate(e.target.value)}
-                                                className="w-full p-5 bg-surface-50 rounded-2xl outline-none focus:bg-white border-2 border-transparent focus:border-primary transition-all font-bold"
+                                                className="w-full p-5 bg-surface-50  outline-none focus:bg-white border-2 border-transparent focus:border-primary transition-all font-bold"
                                             />
                                         </div>
                                         <div className="space-y-2">
@@ -322,7 +351,7 @@ export default function SubmitEventPage() {
                                                 required
                                                 value={time}
                                                 onChange={(e) => setTime(e.target.value)}
-                                                className="w-full p-5 bg-surface-50 rounded-2xl outline-none focus:bg-white border-2 border-transparent focus:border-primary transition-all font-bold"
+                                                className="w-full p-5 bg-surface-50  outline-none focus:bg-white border-2 border-transparent focus:border-primary transition-all font-bold"
                                             />
                                         </div>
                                     </div>
@@ -349,7 +378,7 @@ export default function SubmitEventPage() {
                                             <select
                                                 value={category}
                                                 onChange={(e) => setCategory(e.target.value)}
-                                                className="w-full p-5 bg-surface-50 rounded-2xl outline-none appearance-none font-bold focus:bg-white border-2 border-transparent focus:border-accent transition-all cursor-pointer"
+                                                className="w-full p-5 bg-surface-50  outline-none appearance-none font-bold focus:bg-white border-2 border-transparent focus:border-accent transition-all cursor-pointer"
                                             >
                                                 {preferences?.categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                                             </select>
@@ -387,31 +416,41 @@ export default function SubmitEventPage() {
 
                                 <div className="space-y-6 font-medium">
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-surface-800/40 ml-1">Event Poster (Feature Image)</label>
+                                        <div className="flex items-center justify-between ml-1">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-surface-800/40">Event Card (800x1200)</label>
+                                            <div className="relative group">
+                                                <button type="button" className="text-primary text-[10px] font-black bg-primary/10 w-4 h-4 flex items-center justify-center rounded-full">i</button>
+                                                <div className="absolute right-0 bottom-full pb-2 w-48 opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none group-hover:pointer-events-auto">
+                                                    <div className="p-3 bg-black text-white text-[10px] font-bold shadow-xl">
+                                                        To get image <a href="https://wa.me/your-number" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">click here</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div className="relative group/upload">
                                             <input
                                                 type="file"
                                                 accept="image/*"
-                                                onChange={handleFileUpload}
+                                                onChange={(e) => handleFileUpload(e, 'card')}
                                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                                 disabled={uploading}
                                             />
-                                            <div className={`w-full py-8 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all ${imageUrl ? 'border-primary/20 bg-primary/5' : 'border-surface-200 bg-white group-hover/upload:border-primary group-hover/upload:bg-primary/5'}`}>
+                                            <div className={`w-full py-8 border-2 border-dashed  flex flex-col items-center justify-center transition-all ${imageUrl ? 'border-primary/20 bg-primary/5' : 'border-surface-200 bg-white group-hover/upload:border-primary group-hover/upload:bg-primary/5'}`}>
                                                 {uploading ? (
                                                     <div className="flex flex-col items-center gap-2">
-                                                        <div className="w-6 h-6 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+                                                        <div className="w-6 h-6 border-3 border-primary border-t-transparent  animate-spin" />
                                                         <span className="text-[10px] font-bold text-primary italic">Uploading...</span>
                                                     </div>
                                                 ) : imageUrl ? (
                                                     <div className="flex flex-col items-center gap-1">
                                                         <span className="text-xl">✅</span>
-                                                        <span className="text-[10px] font-bold text-primary">Poster Uploaded</span>
+                                                        <span className="text-[10px] font-bold text-primary">Card Image Uploaded</span>
                                                     </div>
                                                 ) : (
                                                     <>
                                                         <span className="text-2xl mb-2">📸</span>
-                                                        <span className="text-[10px] font-black uppercase tracking-widest text-surface-400 group-hover/upload:text-primary transition-colors">Click to Upload Poster</span>
-                                                        <span className="text-[8px] text-surface-400 mt-1">Recommended: 1200x1800 (2:3)</span>
+                                                        <span className="text-[10px] font-black uppercase tracking-widest text-surface-400 group-hover/upload:text-primary transition-colors">Click to Upload Card Image</span>
+                                                        <span className="text-[8px] text-surface-400 mt-1">Required: 800x1200 px</span>
                                                     </>
                                                 )}
                                             </div>
@@ -419,12 +458,67 @@ export default function SubmitEventPage() {
                                     </div>
 
                                     {imageUrl && (
-                                        <div className="relative aspect-[2/3] w-full rounded-2xl overflow-hidden border border-surface-200 shadow-sm animate-in fade-in zoom-in duration-300">
-                                            <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                                        <div className="relative aspect-[2/3] w-full  overflow-hidden border border-surface-200 shadow-sm animate-in fade-in zoom-in duration-300">
+                                            <img src={imageUrl} alt="Card Preview" className="w-full h-full object-cover" />
                                             <button
                                                 type="button"
                                                 onClick={() => setImageUrl('')}
-                                                className="absolute top-2 right-2 w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-xs shadow-lg hover:bg-white transition-colors"
+                                                className="absolute top-2 right-2 w-8 h-8 bg-white/90 backdrop-blur  flex items-center justify-center text-xs shadow-lg hover:bg-white transition-colors"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between ml-1">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-surface-800/40">Detailed Screen (1920x1080)</label>
+                                            <div className="relative group">
+                                                <button type="button" className="text-primary text-[10px] font-black bg-primary/10 w-4 h-4 flex items-center justify-center rounded-full">i</button>
+                                                <div className="absolute right-0 bottom-full pb-2 w-48 opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none group-hover:pointer-events-auto">
+                                                    <div className="p-3 bg-black text-white text-[10px] font-bold shadow-xl">
+                                                        To get image <a href="https://wa.me/your-number" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">click here</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="relative group/upload-detail">
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={(e) => handleFileUpload(e, 'detail')}
+                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                                disabled={detailUploading}
+                                            />
+                                            <div className={`w-full py-8 border-2 border-dashed  flex flex-col items-center justify-center transition-all ${detailImageUrl ? 'border-primary/20 bg-primary/5' : 'border-surface-200 bg-white group-hover-detail:border-primary group-hover-detail:bg-primary/5'}`}>
+                                                {detailUploading ? (
+                                                    <div className="flex flex-col items-center gap-2">
+                                                        <div className="w-6 h-6 border-3 border-primary border-t-transparent  animate-spin" />
+                                                        <span className="text-[10px] font-bold text-primary italic">Uploading...</span>
+                                                    </div>
+                                                ) : detailImageUrl ? (
+                                                    <div className="flex flex-col items-center gap-1">
+                                                        <span className="text-xl">✅</span>
+                                                        <span className="text-[10px] font-bold text-primary">Detail Image Uploaded</span>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <span className="text-2xl mb-2">📸</span>
+                                                        <span className="text-[10px] font-black uppercase tracking-widest text-surface-400 group-hover-detail:text-primary transition-colors">Click to Upload Detail Image</span>
+                                                        <span className="text-[8px] text-surface-400 mt-1">Required: 1920x1080 px</span>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {detailImageUrl && (
+                                        <div className="relative aspect-video w-full  overflow-hidden border border-surface-200 shadow-sm animate-in fade-in zoom-in duration-300">
+                                            <img src={detailImageUrl} alt="Detail Preview" className="w-full h-full object-cover" />
+                                            <button
+                                                type="button"
+                                                onClick={() => setDetailImageUrl('')}
+                                                className="absolute top-2 right-2 w-8 h-8 bg-white/90 backdrop-blur  flex items-center justify-center text-xs shadow-lg hover:bg-white transition-colors"
                                             >
                                                 ✕
                                             </button>
@@ -438,7 +532,7 @@ export default function SubmitEventPage() {
                                             placeholder="e.g. Free, Paid ₹500"
                                             value={entry}
                                             onChange={(e) => setEntry(e.target.value)}
-                                            className="w-full p-4 bg-white border border-surface-200 rounded-xl outline-none focus:border-primary transition-all text-sm font-bold"
+                                            className="w-full p-4 bg-white border border-surface-200  outline-none focus:border-primary transition-all text-sm font-bold"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -448,7 +542,7 @@ export default function SubmitEventPage() {
                                             placeholder="zoom.us/abc..."
                                             value={meetingLink}
                                             onChange={(e) => setMeetingLink(e.target.value)}
-                                            className="w-full p-4 bg-white border border-surface-200 rounded-xl outline-none focus:border-primary transition-all text-sm"
+                                            className="w-full p-4 bg-white border border-surface-200  outline-none focus:border-primary transition-all text-sm"
                                         />
                                     </div>
                                 </div>
@@ -456,12 +550,12 @@ export default function SubmitEventPage() {
                                 <div className="pt-4 space-y-4">
                                     <button
                                         type="submit"
-                                        disabled={uploading || !imageUrl || submitting}
+                                        disabled={uploading || detailUploading || !imageUrl || !detailImageUrl || submitting}
                                         className="w-full py-5 bg-primary text-white font-black text-lg rounded-[1.5rem] shadow-premium hover:bg-primary-dark transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-3 disabled:opacity-50 disabled:grayscale disabled:transform-none"
                                     >
                                         {submitting ? (
                                             <>
-                                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                <div className="w-5 h-5 border-2 border-white border-t-transparent  animate-spin" />
                                                 Submitting...
                                             </>
                                         ) : (
@@ -486,3 +580,4 @@ export default function SubmitEventPage() {
         </main>
     );
 }
+

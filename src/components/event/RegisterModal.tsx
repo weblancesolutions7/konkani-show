@@ -60,10 +60,10 @@ export default function RegisterModal({ isOpen, onClose, event }: RegisterModalP
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-            <div className="bg-surface-50 w-full max-w-md rounded-2xl shadow-xl overflow-hidden relative" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-surface-50 w-full max-w-md  shadow-xl overflow-hidden relative" onClick={(e) => e.stopPropagation()}>
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-surface-500 hover:text-surface-900 bg-surface-100 hover:bg-surface-200 p-2 rounded-full transition-colors"
+                    className="absolute top-4 right-4 text-surface-500 hover:text-surface-900 bg-surface-100 hover:bg-surface-200 p-2  transition-colors"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -78,7 +78,7 @@ export default function RegisterModal({ isOpen, onClose, event }: RegisterModalP
 
                     {status === 'success' ? (
                         <div className="text-center py-8">
-                            <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <div className="w-16 h-16 bg-green-100 text-green-600  flex items-center justify-center mx-auto mb-4">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-8 h-8">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                 </svg>
@@ -87,7 +87,7 @@ export default function RegisterModal({ isOpen, onClose, event }: RegisterModalP
                             <p className="text-surface-600 mb-6">We've received your registration for this event.</p>
                             <button
                                 onClick={onClose}
-                                className="w-full py-3 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primary-dark transition-all transform active:scale-95"
+                                className="w-full py-3 bg-primary text-white font-bold  shadow-lg hover:bg-primary-dark transition-all transform active:scale-95"
                             >
                                 Close
                             </button>
@@ -102,7 +102,7 @@ export default function RegisterModal({ isOpen, onClose, event }: RegisterModalP
                                     required
                                     value={formData.name}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 rounded-xl border border-surface-200 focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white transition-all outline-none"
+                                    className="w-full px-4 py-3  border border-surface-200 focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white transition-all outline-none"
                                     placeholder="John Doe"
                                 />
                             </div>
@@ -115,7 +115,7 @@ export default function RegisterModal({ isOpen, onClose, event }: RegisterModalP
                                     required
                                     value={formData.email}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 rounded-xl border border-surface-200 focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white transition-all outline-none"
+                                    className="w-full px-4 py-3  border border-surface-200 focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white transition-all outline-none"
                                     placeholder="john@example.com"
                                 />
                             </div>
@@ -128,7 +128,7 @@ export default function RegisterModal({ isOpen, onClose, event }: RegisterModalP
                                     required
                                     value={formData.phone}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 rounded-xl border border-surface-200 focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white transition-all outline-none"
+                                    className="w-full px-4 py-3  border border-surface-200 focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white transition-all outline-none"
                                     placeholder="+1 (555) 000-0000"
                                 />
                             </div>
@@ -143,12 +143,12 @@ export default function RegisterModal({ isOpen, onClose, event }: RegisterModalP
                                     max="10"
                                     value={formData.tickets}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 rounded-xl border border-surface-200 focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white transition-all outline-none"
+                                    className="w-full px-4 py-3  border border-surface-200 focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white transition-all outline-none"
                                 />
                             </div>
 
                             {status === 'error' && (
-                                <div className="p-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm">
+                                <div className="p-3  bg-red-50 border border-red-100 text-red-600 text-sm">
                                     {errorMessage}
                                 </div>
                             )}
@@ -156,7 +156,7 @@ export default function RegisterModal({ isOpen, onClose, event }: RegisterModalP
                             <button
                                 type="submit"
                                 disabled={status === 'loading'}
-                                className="w-full py-4 mt-2 bg-primary text-white font-black rounded-xl shadow-lg hover:bg-primary-dark transition-all transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                className="w-full py-4 mt-2 bg-primary text-white font-black  shadow-lg hover:bg-primary-dark transition-all transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
                                 {status === 'loading' ? (
                                     <>
@@ -177,3 +177,4 @@ export default function RegisterModal({ isOpen, onClose, event }: RegisterModalP
         </div>
     );
 }
+

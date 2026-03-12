@@ -27,7 +27,7 @@ export default function AdminSidebar({ onSeedData }: { onSeedData?: () => void }
                     <Link
                         key={item.href}
                         href={item.href}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
+                        className={`flex items-center gap-3 px-4 py-3  font-bold transition-all ${
                             pathname === item.href
                                 ? 'bg-primary text-white shadow-lg'
                                 : 'text-surface-600 hover:bg-surface-50 hover:text-primary'
@@ -43,14 +43,14 @@ export default function AdminSidebar({ onSeedData }: { onSeedData?: () => void }
                 {onSeedData && (
                     <button
                         onClick={onSeedData}
-                        className="w-full px-4 py-3 bg-amber-50 border border-amber-200 text-amber-700 rounded-xl font-bold hover:shadow-md transition-all text-sm flex items-center gap-2"
+                        className="w-full px-4 py-3 bg-amber-50 border border-amber-200 text-amber-700  font-bold hover:shadow-md transition-all text-sm flex items-center gap-2"
                     >
                         🌱 Seed Data
                     </button>
                 )}
                 <Link
                     href="/submit-event"
-                    className="w-full px-4 py-3 bg-primary text-white rounded-xl font-bold shadow-lg hover:bg-primary-dark transition-all text-sm flex items-center justify-center gap-2"
+                    className="w-full px-4 py-3 bg-primary text-white  font-bold shadow-lg hover:bg-primary-dark transition-all text-sm flex items-center justify-center gap-2"
                 >
                     ➕ Create Event
                 </Link>
@@ -58,3 +58,4 @@ export default function AdminSidebar({ onSeedData }: { onSeedData?: () => void }
         </aside>
     );
 }
+

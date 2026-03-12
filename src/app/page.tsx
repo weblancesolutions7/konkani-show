@@ -1,9 +1,9 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { usePreferences } from '@/hooks/usePreferences';
 import { useEvents } from '@/hooks/useEvents';
 import HeroBanner from '@/components/home/HeroBanner';
@@ -12,17 +12,18 @@ import ScrollRow from '@/components/ui/ScrollRow';
 
 // Lazy load heavy components
 const EventCard = dynamic(() => import('@/components/ui/EventCard'), {
-  loading: () => <div className="aspect-[2/3] rounded-xl bg-surface-200 animate-pulse" />,
+  loading: () => <div className="aspect-[2/3]  bg-surface-200 animate-pulse" />,
 });
 
 const FeaturedCategoryCard = dynamic(() => import('@/components/ui/FeaturedCategoryCard'), {
-  loading: () => <div className="aspect-square md:aspect-[4/5] rounded-2xl bg-surface-200 animate-pulse" />,
+  loading: () => <div className="aspect-square md:aspect-[4/5]  bg-surface-200 animate-pulse" />,
 });
 
 export default function HomePage() {
   const { preferences, loading: prefLoading } = usePreferences();
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const { location, loading: locLoading } = useUserLocation();
+  const router = useRouter();
 
   useEffect(() => {
     const loadCities = () => {
@@ -65,9 +66,9 @@ export default function HomePage() {
   if (prefLoading) {
     return (
       <div className="min-h-screen bg-surface-50 p-6 space-y-8 animate-pulse">
-        <div className="h-64 md:h-96 rounded-2xl bg-surface-200" />
+        <div className="h-64 md:h-96  bg-surface-200" />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map(i => <div key={i} className="aspect-[2/3] rounded-xl bg-surface-200" />)}
+          {[1, 2, 3, 4].map(i => <div key={i} className="aspect-[2/3]  bg-surface-200" />)}
         </div>
       </div>
     );
@@ -78,13 +79,13 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-surface-50 pb-20">
-      {/* Wrapper to match container constraints */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+      {/* Full Width Hero Carousel */}
+      <section className="mb-12">
+        <HeroBanner items={featuredItems} />
+      </section>
 
-        {/* Dynamic Hero Carousel */}
-        <section className="mb-12">
-          <HeroBanner items={featuredItems} />
-        </section>
+      {/* Wrapper to match container constraints for other sections */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Recommended Events Section */}
         <section className="mb-16">
@@ -96,7 +97,7 @@ export default function HomePage() {
             {recLoading ? (
               <div className="flex gap-4 md:gap-8 overflow-x-auto pb-4 snap-x no-scrollbar">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="min-w-[160px] md:min-w-[200px] aspect-[2/3] rounded-xl bg-surface-200 animate-pulse snap-start shrink-0" />
+                  <div key={i} className="min-w-[160px] md:min-w-[200px] aspect-[2/3]  bg-surface-200 animate-pulse snap-start shrink-0" />
                 ))}
               </div>
             ) : recommendedEvents.length > 0 ? (
@@ -124,7 +125,7 @@ export default function HomePage() {
             {nearbyLoading ? (
               <div className="flex gap-4 md:gap-8 overflow-x-auto pb-4 snap-x no-scrollbar">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="min-w-[160px] md:min-w-[200px] aspect-[2/3] rounded-xl bg-surface-200 animate-pulse snap-start shrink-0" />
+                  <div key={i} className="min-w-[160px] md:min-w-[200px] aspect-[2/3]  bg-surface-200 animate-pulse snap-start shrink-0" />
                 ))}
               </div>
             ) : nearbyEvents.length > 0 ? (
@@ -158,8 +159,7 @@ export default function HomePage() {
                 key={i}
                 item={item}
                 onClick={() => {
-                    // Navigate to category page since we removed tabs
-                    window.location.href = `/events?category=${item.category}`; 
+                    router.push(`/events?category=${encodeURIComponent(item.category)}`); 
                 }}
               />
             ))}
@@ -176,7 +176,7 @@ export default function HomePage() {
             {popLoading ? (
               <div className="flex gap-4 md:gap-8 overflow-x-auto pb-4 snap-x no-scrollbar">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="min-w-[160px] md:min-w-[200px] aspect-[2/3] rounded-xl bg-surface-200 animate-pulse snap-start shrink-0" />
+                  <div key={i} className="min-w-[160px] md:min-w-[200px] aspect-[2/3]  bg-surface-200 animate-pulse snap-start shrink-0" />
                 ))}
               </div>
             ) : popularEvents.length > 0 ? (
@@ -203,7 +203,7 @@ export default function HomePage() {
             {featLoading ? (
               <div className="flex gap-4 md:gap-8 overflow-x-auto pb-4 snap-x no-scrollbar">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="min-w-[160px] md:min-w-[200px] aspect-[2/3] rounded-xl bg-surface-200 animate-pulse snap-start shrink-0" />
+                  <div key={i} className="min-w-[160px] md:min-w-[200px] aspect-[2/3]  bg-surface-200 animate-pulse snap-start shrink-0" />
                 ))}
               </div>
             ) : featuredEvents.length > 0 ? (
@@ -223,3 +223,4 @@ export default function HomePage() {
     </main>
   );
 }
+

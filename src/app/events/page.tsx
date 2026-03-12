@@ -86,7 +86,7 @@ export default function EventsPage() {
                             {loading ? (
                                 <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
                                     {Array.from({ length: 8 }).map((_, i) => (
-                                        <div key={i} className="aspect-[2/3] rounded-2xl bg-surface-200 animate-pulse" />
+                                        <div key={i} className="aspect-[2/3]  bg-surface-200 animate-pulse" />
                                     ))}
                                 </div>
                             ) : events.length > 0 ? (
@@ -96,7 +96,7 @@ export default function EventsPage() {
                                     ))}
                                 </div>
                             ) : (
-                                <div className="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-surface-200 shadow-sm">
+                                <div className="text-center py-24 bg-white  border-2 border-dashed border-surface-200 shadow-sm">
                                     <div className="text-6xl mb-4">🎭</div>
                                     <h3 className="text-2xl font-bold text-surface-900 mb-2">No events found</h3>
                                     <p className="text-surface-600 px-6">Try adjusting your filters to find what you're looking for.</p>
@@ -117,4 +117,5 @@ export default function EventsPage() {
         </main>
     );
 }
+
 

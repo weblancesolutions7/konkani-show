@@ -15,7 +15,7 @@ const CategoryPills: React.FC<CategoryPillsProps> = ({ categories, selectedCateg
         <button
           key={cat.id}
           onClick={() => onSelect(cat.id)}
-          className={`px-6 py-2 rounded-full border text-sm font-medium transition-all whitespace-nowrap ${
+          className={`px-6 py-2  border text-sm font-medium transition-all whitespace-nowrap ${
             selectedCategory === cat.id
               ? 'bg-primary text-white border-primary shadow-premium'
               : 'bg-white text-surface-700 border-surface-200 hover:border-primary/50'
@@ -29,3 +29,4 @@ const CategoryPills: React.FC<CategoryPillsProps> = ({ categories, selectedCateg
 };
 
 export default CategoryPills;
+

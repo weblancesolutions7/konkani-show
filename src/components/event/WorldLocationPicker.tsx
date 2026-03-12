@@ -197,18 +197,18 @@ export default function WorldLocationPicker({ value, onChange }: WorldLocationPi
                             placeholder="Search OpenStreetMap (e.g. Eiffel Tower, Paris)"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full p-4 bg-surface-50 rounded-2xl outline-none focus:bg-white border-2 border-transparent focus:border-primary transition-all font-bold text-sm"
+                            className="w-full p-4 bg-surface-50  outline-none focus:bg-white border-2 border-transparent focus:border-primary transition-all font-bold text-sm"
                         />
                         {isSearching && (
                             <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                                <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                <div className="w-5 h-5 border-2 border-primary border-t-transparent  animate-spin"></div>
                             </div>
                         )}
                     </div>
                     
                     {/* Search Results Dropdown */}
                     {searchResults.length > 0 && (
-                        <div className="absolute z-50 top-full left-0 right-0 mt-2 bg-white border border-surface-200 rounded-2xl shadow-xl overflow-hidden max-h-[300px] overflow-y-auto">
+                        <div className="absolute z-50 top-full left-0 right-0 mt-2 bg-white border border-surface-200  shadow-xl overflow-hidden max-h-[300px] overflow-y-auto">
                             {searchResults.map((result, idx) => (
                                 <div 
                                     key={idx}
@@ -227,11 +227,11 @@ export default function WorldLocationPicker({ value, onChange }: WorldLocationPi
                     type="button"
                     onClick={handleUseCurrentLocation}
                     disabled={isLocating}
-                    className="px-6 py-4 bg-surface-100 text-surface-900 font-black text-sm uppercase tracking-wider rounded-2xl hover:bg-surface-200 transition-all flex items-center justify-center gap-2 whitespace-nowrap border-2 border-transparent focus:border-primary shrink-0"
+                    className="px-6 py-4 bg-surface-100 text-surface-900 font-black text-sm uppercase tracking-wider  hover:bg-surface-200 transition-all flex items-center justify-center gap-2 whitespace-nowrap border-2 border-transparent focus:border-primary shrink-0"
                 >
                     {isLocating ? (
                         <>
-                            <div className="w-4 h-4 border-2 border-surface-900 border-t-transparent rounded-full animate-spin"></div>
+                            <div className="w-4 h-4 border-2 border-surface-900 border-t-transparent  animate-spin"></div>
                             Locating...
                         </>
                     ) : (
@@ -251,7 +251,7 @@ export default function WorldLocationPicker({ value, onChange }: WorldLocationPi
                         placeholder="Street, Building, etc."
                         value={venueAddress}
                         onChange={(e) => setVenueAddress(e.target.value)}
-                        className="w-full p-4 bg-surface-50 rounded-2xl outline-none focus:bg-white border-2 border-transparent focus:border-primary transition-all font-bold text-sm"
+                        className="w-full p-4 bg-surface-50  outline-none focus:bg-white border-2 border-transparent focus:border-primary transition-all font-bold text-sm"
                     />
                 </div>
                 <div className="grid grid-cols-2 gap-6">
@@ -262,7 +262,7 @@ export default function WorldLocationPicker({ value, onChange }: WorldLocationPi
                             placeholder="City"
                             value={city}
                             onChange={(e) => setCity(e.target.value)}
-                            className="w-full p-4 bg-surface-50 rounded-2xl outline-none focus:bg-white border-2 border-transparent focus:border-primary transition-all font-bold text-sm"
+                            className="w-full p-4 bg-surface-50  outline-none focus:bg-white border-2 border-transparent focus:border-primary transition-all font-bold text-sm"
                         />
                     </div>
                     <div className="space-y-2">
@@ -272,7 +272,7 @@ export default function WorldLocationPicker({ value, onChange }: WorldLocationPi
                             placeholder="ZIP Code"
                             value={zipCode}
                             onChange={(e) => setZipCode(e.target.value)}
-                            className="w-full p-4 bg-surface-50 rounded-2xl outline-none focus:bg-white border-2 border-transparent focus:border-primary transition-all font-bold text-sm"
+                            className="w-full p-4 bg-surface-50  outline-none focus:bg-white border-2 border-transparent focus:border-primary transition-all font-bold text-sm"
                         />
                     </div>
                 </div>
@@ -281,15 +281,15 @@ export default function WorldLocationPicker({ value, onChange }: WorldLocationPi
             <div className="space-y-4 pt-2">
                 <div className="flex items-center justify-between ml-1 mb-2">
                     <label className="text-xs font-black uppercase tracking-widest text-surface-800/40">Pin Exact Location (Map)</label>
-                    <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md">
+                    <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 ">
                         {lat.toFixed(4)}, {lng.toFixed(4)}
                     </span>
                 </div>
                 
                 {!L ? (
-                    <div className="h-[250px] w-full bg-surface-50 animate-pulse rounded-2xl flex items-center justify-center font-bold text-surface-400">Loading Map...</div>
+                    <div className="h-[250px] w-full bg-surface-50 animate-pulse  flex items-center justify-center font-bold text-surface-400">Loading Map...</div>
                 ) : (
-                    <div className="h-[350px] w-full rounded-2xl overflow-hidden border-2 border-surface-100 relative z-0">
+                    <div className="h-[350px] w-full  overflow-hidden border-2 border-surface-100 relative z-0">
                         <MapContainer
                             center={[lat, lng]}
                             zoom={15}
@@ -318,3 +318,4 @@ export default function WorldLocationPicker({ value, onChange }: WorldLocationPi
         </div>
     );
 }
+

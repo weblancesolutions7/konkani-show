@@ -29,42 +29,52 @@ const HeroBanner: React.FC<HeroBannerProps> = ({ items }) => {
     if (!items || items.length === 0) return null;
 
     return (
-        <div className="relative w-full aspect-[21/9] md:aspect-[25/9] rounded-2xl overflow-hidden shadow-premium group">
+        <div className="relative w-full aspect-[16/8] md:aspect-[4/1] overflow-hidden group">
             {/* Slides */}
             <div
                 className="flex transition-transform duration-700 ease-in-out h-full"
                 style={{ transform: `translateX(-${currentIndex * 100}%)` }}
             >
                 {items.map((item, index) => (
-                    <div key={index} className="relative w-full h-full flex-shrink-0">
+                    <Link
+                        key={index}
+                        href={item.link || `/category/${item.category.toLowerCase()}`}
+                        className="relative w-full h-full flex-shrink-0"
+                    >
                         <Image
                             src={item.featuredImage || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop'}
                             alt={item.category}
                             fill
                             priority={index === 0}
-                            className="object-cover transition-transform duration-700 group-hover:scale-105"
+                            className="object-cover"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                        <div className="absolute bottom-6 left-6 md:bottom-12 md:left-12 max-w-xl">
-                            <span className="inline-block px-3 py-1 bg-primary text-white text-xs font-bold uppercase tracking-wider rounded-full mb-4">
-                                Featured
-                            </span>
-                            <h1 className="text-3xl md:text-5xl font-black text-white mb-4 drop-shadow-lg">
-                                {item.title || `Best of ${item.category} Shows`}
-                            </h1>
-                            <p className="text-white/80 text-sm md:text-lg mb-6 line-clamp-2">
-                                {item.description || `Experience the finest Konkani cultural representation through our curated collection of ${item.category.toLowerCase()} events.`}
-                            </p>
-                            <Link
-                                href={item.link || `/category/${item.category.toLowerCase()}`}
-                                className="inline-flex items-center px-8 py-3 bg-white text-primary font-bold rounded-lg hover:bg-primary hover:text-white transition-all transform hover:scale-105 active:scale-[0.98] shadow-lg"
-                            >
-                                Explore Now
-                            </Link>
-                        </div>
-                    </div>
+                    </Link>
                 ))}
             </div>
+
+            {/* Navigation Buttons */}
+            {items.length > 1 && (
+                <>
+                    <button
+                        onClick={prevSlide}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center  bg-white/20 backdrop-blur-md border border-white/30 text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-white/40 active:scale-90"
+                        aria-label="Previous slide"
+                    >
+                        <svg xmlns="http://www.w3.org/2003/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
+                    </button>
+                    <button
+                        onClick={nextSlide}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center  bg-white/20 backdrop-blur-md border border-white/30 text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-white/40 active:scale-90"
+                        aria-label="Next slide"
+                    >
+                        <svg xmlns="http://www.w3.org/2003/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                        </svg>
+                    </button>
+                </>
+            )}
 
             {/* Indicators */}
             {items.length > 1 && (
@@ -73,7 +83,7 @@ const HeroBanner: React.FC<HeroBannerProps> = ({ items }) => {
                         <button
                             key={index}
                             onClick={() => setCurrentIndex(index)}
-                            className={`w-2 h-2 rounded-full transition-all ${currentIndex === index ? 'bg-white w-6' : 'bg-white/40'
+                            className={`w-2 h-2  transition-all ${currentIndex === index ? 'bg-white w-6' : 'bg-white/40'
                                 }`}
                         />
                     ))}
@@ -84,3 +94,4 @@ const HeroBanner: React.FC<HeroBannerProps> = ({ items }) => {
 };
 
 export default HeroBanner;
+

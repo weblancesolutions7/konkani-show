@@ -48,7 +48,7 @@ const ScrollRow: React.FC<ScrollRowProps> = ({ children, className = "" }) => {
       {/* Navigation Buttons - Hidden on Mobile Touch, shown on Desktop Hover */}
       <button
         onClick={() => scroll('left')}
-        className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 w-12 h-12 flex items-center justify-center rounded-full bg-white shadow-premium text-primary border border-surface-100 transition-all duration-300 hover:scale-110 active:scale-95 disabled:opacity-0 ${
+        className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 w-12 h-12 flex items-center justify-center  bg-white shadow-premium text-primary border border-surface-100 transition-all duration-300 hover:scale-110 active:scale-95 disabled:opacity-0 ${
           showLeft ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         } hidden md:flex`}
         aria-label="Scroll Left"
@@ -60,7 +60,7 @@ const ScrollRow: React.FC<ScrollRowProps> = ({ children, className = "" }) => {
 
       <button
         onClick={() => scroll('right')}
-        className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 w-12 h-12 flex items-center justify-center rounded-full bg-white shadow-premium text-primary border border-surface-100 transition-all duration-300 hover:scale-110 active:scale-95 disabled:opacity-0 ${
+        className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 w-12 h-12 flex items-center justify-center  bg-white shadow-premium text-primary border border-surface-100 transition-all duration-300 hover:scale-110 active:scale-95 disabled:opacity-0 ${
           showRight ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         } hidden md:flex`}
         aria-label="Scroll Right"
@@ -74,3 +74,4 @@ const ScrollRow: React.FC<ScrollRowProps> = ({ children, className = "" }) => {
 };
 
 export default ScrollRow;
+

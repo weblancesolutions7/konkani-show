@@ -16,8 +16,7 @@
   --shadow-premium: 0 10px 15px -3px rgba(112, 48, 239, 0.2), 0 4px 6px -2px rgba(112, 48, 239, 0.1);
   --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 
-  --font-inter: "Inter", sans-serif;
-  --font-outfit: "Outfit", sans-serif;
+  --font-roboto: var(--font-roboto);
 
   --background-brand-gradient: linear-gradient(135deg, #7030ef 0%, #db1fff 100%);
 }
@@ -25,7 +24,7 @@
 :root {
   --background: #ffffff;
   --foreground: #090820;
-  --font-sans: "Inter", sans-serif;
+  --font-sans: var(--font-roboto), "Roboto", sans-serif;
   --surface-50: #ffffff;
   --surface-100: #ffffff;
   --surface-200: #e4e7eb;
@@ -39,6 +38,14 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  border-radius: 0 !important;
+}
+
+.rounded-card-image {
+  border-radius: 12px !important;
 }
 
 .glass-card {
@@ -57,12 +64,15 @@ body {
 }
 
 .no-scrollbar {
-  -ms-overflow-style: none !important; /* IE and Edge */
-  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important;
+  /* IE and Edge */
+  scrollbar-width: none !important;
+  /* Firefox */
 }
 
 .no-scrollbar::-webkit-scrollbar {
-  display: none !important; /* Chrome, Safari and Opera */
+  display: none !important;
+  /* Chrome, Safari and Opera */
   width: 0 !important;
   height: 0 !important;
 }

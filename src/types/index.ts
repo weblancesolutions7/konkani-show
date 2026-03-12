@@ -56,6 +56,7 @@ export interface Event {
   currency?: string;
   tags: string[];
   featureImage: string;
+  detailImage?: string;
   gallery: string[];
   entry?: string;
   meetingLink?: string;

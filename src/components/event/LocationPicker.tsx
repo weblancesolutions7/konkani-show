@@ -8,7 +8,7 @@ import 'leaflet/dist/leaflet.css';
 // Dynamically import MapComponent to avoid SSR issues
 const MapComponent = dynamic(() => import('./MapComponent'), { 
     ssr: false,
-    loading: () => <div className="h-[300px] w-full bg-surface-50 animate-pulse rounded-2xl flex items-center justify-center font-bold text-surface-400">Loading Map...</div>
+    loading: () => <div className="h-[300px] w-full bg-surface-50 animate-pulse  flex items-center justify-center font-bold text-surface-400">Loading Map...</div>
 });
 
 interface LocationPickerProps {
@@ -43,11 +43,11 @@ export default function LocationPicker({ initialLat, initialLng, onLocationSelec
 
     const defaultCenter: [number, number] = [12.9141, 74.8560]; // Mangalore
 
-    if (!L) return <div className="h-[300px] w-full bg-surface-50 animate-pulse rounded-2xl flex items-center justify-center font-bold text-surface-400">Loading Map...</div>;
+    if (!L) return <div className="h-[300px] w-full bg-surface-50 animate-pulse  flex items-center justify-center font-bold text-surface-400">Loading Map...</div>;
 
     return (
         <div className="space-y-4">
-            <div className="h-[300px] w-full rounded-2xl overflow-hidden border-2 border-surface-100 relative z-0">
+            <div className="h-[300px] w-full  overflow-hidden border-2 border-surface-100 relative z-0">
                 <MapComponent 
                     position={position} 
                     onLocationSelect={handleSelect} 
@@ -60,3 +60,4 @@ export default function LocationPicker({ initialLat, initialLng, onLocationSelec
         </div>
     );
 }
+

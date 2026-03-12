@@ -22,6 +22,7 @@ export interface IEvent extends Document {
     category: string;
     tags: string[];
     featureImage: string;
+    detailImage?: string;
     gallery?: string[];
     entry?: string;
     price?: number;
@@ -74,6 +75,7 @@ const EventSchema = new Schema<IEvent>(
         category: { type: String, required: true },
         tags: { type: [String], default: [] },
         featureImage: { type: String, required: true },
+        detailImage: { type: String },
         gallery: { type: [String], default: [] },
         entry: { type: String, default: '' },
         price: { type: Number, default: 0 },

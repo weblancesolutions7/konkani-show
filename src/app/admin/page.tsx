@@ -77,29 +77,29 @@ function EditModal({ event, onClose, onSave }: { event: Event; onClose: () => vo
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
-            <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-white  shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center justify-between mb-8">
                     <h2 className="text-2xl font-black">Edit Event</h2>
-                    <button onClick={onClose} className="w-10 h-10 rounded-full bg-surface-100 flex items-center justify-center hover:bg-surface-200 transition-colors font-bold">✕</button>
+                    <button onClick={onClose} className="w-10 h-10  bg-surface-100 flex items-center justify-center hover:bg-surface-200 transition-colors font-bold">✕</button>
                 </div>
 
                 <div className="space-y-6">
                     <div className="space-y-2">
                         <label className="text-xs font-black uppercase tracking-widest text-surface-800/40">Title</label>
-                        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full p-4 bg-surface-50 rounded-xl border-2 border-transparent focus:border-primary outline-none font-bold" />
+                        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full p-4 bg-surface-50  border-2 border-transparent focus:border-primary outline-none font-bold" />
                     </div>
                     <div className="space-y-2">
                         <label className="text-xs font-black uppercase tracking-widest text-surface-800/40">Description</label>
-                        <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} className="w-full p-4 bg-surface-50 rounded-xl border-2 border-transparent focus:border-primary outline-none font-medium resize-none" />
+                        <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} className="w-full p-4 bg-surface-50  border-2 border-transparent focus:border-primary outline-none font-medium resize-none" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <label className="text-xs font-black uppercase tracking-widest text-surface-800/40">Date</label>
-                            <input type="text" value={date} onChange={(e) => setDate(e.target.value)} className="w-full p-4 bg-surface-50 rounded-xl border-2 border-transparent focus:border-primary outline-none font-bold" />
+                            <input type="text" value={date} onChange={(e) => setDate(e.target.value)} className="w-full p-4 bg-surface-50  border-2 border-transparent focus:border-primary outline-none font-bold" />
                         </div>
                         <div className="space-y-2">
                             <label className="text-xs font-black uppercase tracking-widest text-surface-800/40">Time</label>
-                            <input type="text" value={time} onChange={(e) => setTime(e.target.value)} className="w-full p-4 bg-surface-50 rounded-xl border-2 border-transparent focus:border-primary outline-none font-bold" />
+                            <input type="text" value={time} onChange={(e) => setTime(e.target.value)} className="w-full p-4 bg-surface-50  border-2 border-transparent focus:border-primary outline-none font-bold" />
                         </div>
                     </div>
                     <div className="space-y-4">
@@ -111,16 +111,16 @@ function EditModal({ event, onClose, onSave }: { event: Event; onClose: () => vo
                     </div>
                     <div className="space-y-2">
                         <label className="text-xs font-black uppercase tracking-widest text-surface-800/40">Category</label>
-                        <input type="text" value={category} onChange={(e) => setCategory(e.target.value)} className="w-full p-4 bg-surface-50 rounded-xl border-2 border-transparent focus:border-primary outline-none font-bold" />
+                        <input type="text" value={category} onChange={(e) => setCategory(e.target.value)} className="w-full p-4 bg-surface-50  border-2 border-transparent focus:border-primary outline-none font-bold" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <label className="text-xs font-black uppercase tracking-widest text-surface-800/40">Entry Fee</label>
-                            <input type="text" value={entry} onChange={(e) => setEntry(e.target.value)} className="w-full p-4 bg-surface-50 rounded-xl border-2 border-transparent focus:border-primary outline-none font-bold" />
+                            <input type="text" value={entry} onChange={(e) => setEntry(e.target.value)} className="w-full p-4 bg-surface-50  border-2 border-transparent focus:border-primary outline-none font-bold" />
                         </div>
                         <div className="space-y-2">
                             <label className="text-xs font-black uppercase tracking-widest text-surface-800/40">Meeting Link</label>
-                            <input type="text" value={meetingLink} onChange={(e) => setMeetingLink(e.target.value)} className="w-full p-4 bg-surface-50 rounded-xl border-2 border-transparent focus:border-primary outline-none" />
+                            <input type="text" value={meetingLink} onChange={(e) => setMeetingLink(e.target.value)} className="w-full p-4 bg-surface-50  border-2 border-transparent focus:border-primary outline-none" />
                         </div>
                     </div>
                 </div>
@@ -129,15 +129,15 @@ function EditModal({ event, onClose, onSave }: { event: Event; onClose: () => vo
                     <button
                         onClick={handleSave}
                         disabled={saving}
-                        className="flex-1 py-4 bg-primary text-white font-black rounded-xl shadow-lg hover:bg-primary-dark transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                        className="flex-1 py-4 bg-primary text-white font-black  shadow-lg hover:bg-primary-dark transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                         {saving ? (
-                            <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Saving...</>
+                            <><div className="w-4 h-4 border-2 border-white border-t-transparent  animate-spin" /> Saving...</>
                         ) : (
                             'Save Changes'
                         )}
                     </button>
-                    <button onClick={onClose} className="px-8 py-4 bg-surface-100 text-surface-800 font-bold rounded-xl hover:bg-surface-200 transition-colors">
+                    <button onClick={onClose} className="px-8 py-4 bg-surface-100 text-surface-800 font-bold  hover:bg-surface-200 transition-colors">
                         Cancel
                     </button>
                 </div>
@@ -258,7 +258,7 @@ export default function AdminDashboard() {
                         <p className="text-surface-800/60 font-medium">Approve, edit, or remove community events and shows.</p>
                     </header>
 
-                    <section className="bg-surface-50 rounded-3xl p-8 shadow-premium border border-surface-200">
+                    <section className="bg-surface-50  p-8 shadow-premium border border-surface-200">
                         <div className="flex border-b border-surface-100 mb-8 overflow-x-auto">
                             {(['PENDING', 'APPROVED', 'DELETED'] as AdminTab[]).map(tab => (
                                 <button
@@ -277,7 +277,7 @@ export default function AdminDashboard() {
                         {loading ? (
                             <div className="space-y-4">
                                 {Array.from({ length: 5 }).map((_, i) => (
-                                    <div key={i} className="h-16 w-full bg-surface-100 animate-pulse rounded-lg" />
+                                    <div key={i} className="h-16 w-full bg-surface-100 animate-pulse " />
                                 ))}
                             </div>
                         ) : (
@@ -303,3 +303,4 @@ export default function AdminDashboard() {
         </div>
     );
 }
+

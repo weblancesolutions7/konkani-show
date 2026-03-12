@@ -1,4 +1,4 @@
-Ôªø
+
 'use client';
 
 import React, { useState } from 'react';
@@ -281,7 +281,7 @@ export default function PreferencesPage() {
                             <button
                                 key={manager}
                                 onClick={() => setActiveManager(manager)}
-                                className={`w-full text-left px-5 py-3 rounded-xl font-bold transition-all ${activeManager === manager
+                                className={`w-full text-left px-5 py-3  font-bold transition-all ${activeManager === manager
                                     ? 'bg-primary text-white shadow-lg'
                                     : 'bg-surface-50 border border-surface-200 text-surface-800/60 hover:border-primary/50'
                                     }`}
@@ -292,10 +292,10 @@ export default function PreferencesPage() {
                     </nav>
 
                     <div className="md:col-span-3">
-                        <section className="bg-surface-50 p-8 rounded-3xl border border-surface-200 shadow-premium relative">
+                        <section className="bg-surface-50 p-8  border border-surface-200 shadow-premium relative">
                             {isSaving && (
-                                <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center z-10 rounded-3xl">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                                <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center z-10 ">
+                                    <div className="animate-spin  h-8 w-8 border-b-2 border-primary"></div>
                                 </div>
                             )}
 
@@ -310,12 +310,12 @@ export default function PreferencesPage() {
                                             value={newTag}
                                             onChange={(e) => setNewTag(e.target.value)}
                                             placeholder="New tag name..."
-                                            className="flex-1 px-4 py-2 rounded-xl border border-surface-200 outline-none focus:border-primary"
+                                            className="flex-1 px-4 py-2  border border-surface-200 outline-none focus:border-primary"
                                             onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
                                         />
                                         <button
                                             onClick={handleAddTag}
-                                            className="px-6 py-2 bg-primary text-white font-bold rounded-xl"
+                                            className="px-6 py-2 bg-primary text-white font-bold "
                                         >
                                             Add
                                         </button>
@@ -326,9 +326,9 @@ export default function PreferencesPage() {
                                                 <TagChip label={tag.name} />
                                                 <button
                                                     onClick={() => handleDeleteTag(tag.id)}
-                                                    className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white rounded-full text-[10px] flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white  text-[10px] flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
                                                 >
-                                                    Œì¬£√≤
+                                                    G£Ú
                                                 </button>
                                             </div>
                                         ))}
@@ -345,19 +345,19 @@ export default function PreferencesPage() {
                                             value={newCategory}
                                             onChange={(e) => setNewCategory(e.target.value)}
                                             placeholder="New category name..."
-                                            className="flex-1 px-4 py-2 rounded-xl border border-surface-200 outline-none focus:border-primary"
+                                            className="flex-1 px-4 py-2  border border-surface-200 outline-none focus:border-primary"
                                             onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
                                         />
                                         <button
                                             onClick={handleAddCategory}
-                                            className="px-6 py-2 bg-primary text-white font-bold rounded-xl"
+                                            className="px-6 py-2 bg-primary text-white font-bold "
                                         >
                                             Add
                                         </button>
                                     </div>
                                     <div className="space-y-3">
                                         {preferences?.categories.map(cat => (
-                                            <div key={cat.id} className="flex items-center justify-between p-4 bg-surface-50 rounded-xl border border-surface-100">
+                                            <div key={cat.id} className="flex items-center justify-between p-4 bg-surface-50  border border-surface-100">
                                                 <span className="font-bold">{cat.name}</span>
                                                 <div className="flex gap-4 items-center">
                                                     <span className="text-xs font-bold text-surface-800/40 uppercase tracking-tighter">{cat.count || 0} Events</span>
@@ -365,7 +365,7 @@ export default function PreferencesPage() {
                                                         onClick={() => handleDeleteCategory(cat.id)}
                                                         className="text-surface-800/20 hover:text-rose-500 transition-colors"
                                                     >
-                                                        ‚â°∆í√π√¶‚à©‚ïï√Ö
+                                                        =É˘Ên+≈
                                                     </button>
                                                 </div>
                                             </div>
@@ -383,25 +383,25 @@ export default function PreferencesPage() {
                                             value={newCity}
                                             onChange={(e) => setNewCity(e.target.value)}
                                             placeholder="New city name..."
-                                            className="flex-1 px-4 py-2 rounded-xl border border-surface-200 outline-none focus:border-primary"
+                                            className="flex-1 px-4 py-2  border border-surface-200 outline-none focus:border-primary"
                                             onKeyDown={(e) => e.key === 'Enter' && handleAddCity()}
                                         />
                                         <button
                                             onClick={handleAddCity}
-                                            className="px-6 py-2 bg-primary text-white font-bold rounded-xl"
+                                            className="px-6 py-2 bg-primary text-white font-bold "
                                         >
                                             Add
                                         </button>
                                     </div>
                                     <div className="space-y-3">
                                         {preferences?.cities?.map(city => (
-                                            <div key={city} className="flex items-center justify-between p-4 bg-surface-50 rounded-xl border border-surface-100">
+                                            <div key={city} className="flex items-center justify-between p-4 bg-surface-50  border border-surface-100">
                                                 <span className="font-bold">{city}</span>
                                                 <button
                                                     onClick={() => handleDeleteCity(city)}
                                                     className="text-surface-800/20 hover:text-rose-500 transition-colors"
                                                 >
-                                                    ‚â°∆í√π√¶‚à©‚ïï√Ö
+                                                    =É˘Ên+≈
                                                 </button>
                                             </div>
                                         ))}
@@ -427,14 +427,14 @@ export default function PreferencesPage() {
                                     </div>
                                     
                                     {/* Editor Form */}
-                                    <div className="p-6 bg-surface-100/50 rounded-2xl border border-surface-200 space-y-4">
+                                    <div className="p-6 bg-surface-100/50  border border-surface-200 space-y-4">
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-1">
                                                 <label className="text-[10px] font-black uppercase text-surface-500 ml-1">Category Link</label>
                                                 <select
                                                     value={heroForm.category}
                                                     onChange={(e) => setHeroForm({...heroForm, category: e.target.value})}
-                                                    className="w-full px-4 py-2 rounded-xl border border-surface-200 bg-white"
+                                                    className="w-full px-4 py-2  border border-surface-200 bg-white"
                                                 >
                                                     <option value="">Select Category...</option>
                                                     {preferences?.categories.map(c => (
@@ -449,7 +449,7 @@ export default function PreferencesPage() {
                                                     value={heroForm.title}
                                                     onChange={(e) => setHeroForm({...heroForm, title: e.target.value})}
                                                     placeholder="Hero Headline..."
-                                                    className="w-full px-4 py-2 rounded-xl border border-surface-200 bg-white"
+                                                    className="w-full px-4 py-2  border border-surface-200 bg-white"
                                                 />
                                             </div>
                                         </div>
@@ -459,7 +459,7 @@ export default function PreferencesPage() {
                                                 value={heroForm.description}
                                                 onChange={(e) => setHeroForm({...heroForm, description: e.target.value})}
                                                 placeholder="Slide descriptive text..."
-                                                className="w-full px-4 py-2 rounded-xl border border-surface-200 bg-white h-20 resize-none"
+                                                className="w-full px-4 py-2  border border-surface-200 bg-white h-20 resize-none"
                                             />
                                         </div>
                                         <div className="space-y-1">
@@ -470,7 +470,7 @@ export default function PreferencesPage() {
                                                     value={heroForm.featuredImage}
                                                     onChange={(e) => setHeroForm({...heroForm, featuredImage: e.target.value})}
                                                     placeholder="Image URL or upload..."
-                                                    className="flex-1 px-4 py-3 rounded-xl border border-surface-200 bg-white text-sm"
+                                                    className="flex-1 px-4 py-3  border border-surface-200 bg-white text-sm"
                                                 />
                                                 <div className="relative h-[46px]">
                                                     <input
@@ -482,9 +482,9 @@ export default function PreferencesPage() {
                                                     />
                                                     <button 
                                                         type="button"
-                                                        className={`h-full px-6 border border-surface-200 rounded-xl bg-surface-50 text-xs font-black uppercase tracking-wider transition-all shadow-sm ${isUploadingHero ? 'animate-pulse text-primary' : 'hover:bg-surface-100 hover:border-primary/30 active:scale-95'}`}
+                                                        className={`h-full px-6 border border-surface-200  bg-surface-50 text-xs font-black uppercase tracking-wider transition-all shadow-sm ${isUploadingHero ? 'animate-pulse text-primary' : 'hover:bg-surface-100 hover:border-primary/30 active:scale-95'}`}
                                                     >
-                                                        {isUploadingHero ? 'Œì√Ö‚îÇ Uploading...' : '‚â°∆í√¥√º Upload Image'}
+                                                        {isUploadingHero ? 'G≈¶ Uploading...' : '=ÉÙ¸ Upload Image'}
                                                     </button>
                                                 </div>
                                             </div>
@@ -492,7 +492,7 @@ export default function PreferencesPage() {
                                         <button
                                             onClick={handleSaveHeroItem}
                                             disabled={!heroForm.category || !heroForm.featuredImage}
-                                            className="w-full py-3 bg-brand-gradient text-white font-black rounded-xl shadow-lg disabled:opacity-50 transform active:scale-[0.98] transition-all"
+                                            className="w-full py-3 bg-brand-gradient text-white font-black  shadow-lg disabled:opacity-50 transform active:scale-[0.98] transition-all"
                                         >
                                             {editingHeroId ? 'Update Hero Slide' : 'Add to Hero Carousel'}
                                         </button>
@@ -502,8 +502,8 @@ export default function PreferencesPage() {
                                     <div className="space-y-4 pt-4 border-t border-surface-200">
                                         <h3 className="text-sm font-black uppercase tracking-widest text-surface-400">Current Items & Priority</h3>
                                         {preferences?.featuredCategories.map((f, i) => (
-                                            <div key={f.id || i} className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-surface-200 shadow-sm hover:shadow-md transition-shadow group">
-                                                <div className="w-16 h-20 rounded-lg bg-surface-100 overflow-hidden flex-shrink-0 border border-surface-200 relative">
+                                            <div key={f.id || i} className="flex items-center gap-4 p-4 bg-white  border border-surface-200 shadow-sm hover:shadow-md transition-shadow group">
+                                                <div className="w-16 h-20  bg-surface-100 overflow-hidden flex-shrink-0 border border-surface-200 relative">
                                                     <img src={f.featuredImage} className="w-full h-full object-cover" />
                                                     <div className="absolute top-1 right-1 bg-black/60 text-white text-[8px] px-1 rounded font-bold">
                                                         #{i + 1}
@@ -527,30 +527,30 @@ export default function PreferencesPage() {
                                                             onClick={() => handleReorderFeatured(i, i - 1)}
                                                             className="p-1 hover:bg-surface-50 rounded disabled:opacity-20 transition-colors"
                                                         >
-                                                            Œì√ª‚ñì
+                                                            G˚¶
                                                         </button>
                                                         <button
                                                             disabled={i === (preferences.featuredCategories.length - 1)}
                                                             onClick={() => handleReorderFeatured(i, i + 1)}
                                                             className="p-1 hover:bg-surface-50 rounded disabled:opacity-20 transition-colors"
                                                         >
-                                                            Œì√ª‚ïù
+                                                            G˚+
                                                         </button>
                                                     </div>
                                                     <div className="h-8 w-px bg-surface-200" />
                                                     <button
                                                         onClick={() => startEditingHero(f)}
-                                                        className="p-2 hover:bg-primary/10 text-primary rounded-lg transition-colors"
+                                                        className="p-2 hover:bg-primary/10 text-primary  transition-colors"
                                                         title="Edit"
                                                     >
-                                                        Œì¬£√Ö‚à©‚ïï√Ö
+                                                        G£≈n+≈
                                                     </button>
                                                     <button
                                                         onClick={() => handleDeleteHeroItem(f.id)}
-                                                        className="p-2 hover:bg-rose-50 text-rose-500 rounded-lg transition-colors"
+                                                        className="p-2 hover:bg-rose-50 text-rose-500  transition-colors"
                                                         title="Delete"
                                                     >
-                                                        ‚â°∆í√π√¶‚à©‚ïï√Ö
+                                                        =É˘Ên+≈
                                                     </button>
                                                 </div>
                                             </div>
@@ -565,3 +565,4 @@ export default function PreferencesPage() {
         </main>
     );
 }
+
