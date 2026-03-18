@@ -24,7 +24,6 @@ export interface FeaturedCategory {
 export interface Preferences {
   tags: Tag[];
   categories: Category[];
-  cities: string[];
   languages: string[];
   featuredCategories: FeaturedCategory[];
 }

@@ -1,9 +1,10 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import dynamoose from '@/lib/dynamodb';
+import { Item } from 'dynamoose/dist/Item';
 
-export interface IPreferences extends Document {
+export interface IPreferences extends Item {
+    id: string; // DynamoDB partition key
     tags: { id: string; name: string }[];
     categories: { id: string; name: string; count?: number }[];
-    cities: string[];
     languages: string[];
     featuredCategories: {
         id: string;
@@ -16,43 +17,48 @@ export interface IPreferences extends Document {
     }[];
 }
 
-const PreferencesSchema = new Schema<IPreferences>(
+const TagSchema = new dynamoose.Schema({
+    id: { type: String, required: true },
+    name: { type: String, required: true },
+});
+
+const CategorySchema = new dynamoose.Schema({
+    id: { type: String, required: true },
+    name: { type: String, required: true },
+    count: { type: Number, default: 0 },
+});
+
+const FeaturedCategorySchema = new dynamoose.Schema({
+    id: { type: String, required: true },
+    category: { type: String, required: true },
+    title: { type: String },
+    description: { type: String },
+    featuredImage: { type: String },
+    link: { type: String },
+    highlightClass: { type: String },
+});
+
+const PreferencesSchema = new dynamoose.Schema(
     {
-        tags: [
-            {
-                id: { type: String, required: true },
-                name: { type: String, required: true },
-            },
-        ],
-        categories: [
-            {
-                id: { type: String, required: true },
-                name: { type: String, required: true },
-                count: { type: Number, default: 0 },
-            },
-        ],
-        cities: [{ type: String }],
-        languages: [{ type: String }],
-        featuredCategories: [
-            {
-                id: { type: String, required: true },
-                category: { type: String, required: true },
-                title: { type: String },
-                description: { type: String },
-                featuredImage: { type: String },
-                link: { type: String },
-                highlightClass: { type: String },
-            },
-        ],
+        id: { 
+            type: String, 
+            hashKey: true,
+            default: 'singleton' // We use 'singleton' because preferences is mostly a single global document
+        },
+        tags: { type: Array, schema: [TagSchema] },
+        categories: { type: Array, schema: [CategorySchema] },
+        languages: { type: Array, schema: [String] },
+        featuredCategories: { type: Array, schema: [FeaturedCategorySchema] },
+        createdAt: { type: Number, default: () => Date.now() },
+        updatedAt: { type: Number, default: () => Date.now() },
     },
-    {
-        timestamps: true,
-        collection: 'preferences'
+    { 
+        saveUnknown: true 
     }
 );
 
-const PreferencesModel: Model<IPreferences> =
-    mongoose.models.Preferences ||
-    mongoose.model<IPreferences>('Preferences', PreferencesSchema);
+const PreferencesModel = dynamoose.model<IPreferences>('app_preferences', PreferencesSchema, {
+    create: true
+});
 
 export default PreferencesModel;

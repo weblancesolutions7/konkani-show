@@ -1,42 +1,50 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import dynamoose from '@/lib/dynamodb';
+import { Item } from 'dynamoose/dist/Item';
+import { v4 as uuidv4 } from 'uuid';
 
-export interface IRegistration extends Document {
-    eventId: mongoose.Types.ObjectId;
+export interface IRegistration extends Item {
+    id: string; // The partition key
+    eventId: string; // UUID from event
     name: string;
     email: string;
     phone: string;
     tickets: number;
     status: 'PENDING' | 'CONFIRMED' | 'CANCELLED';
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt?: number;
+    updatedAt?: number;
 }
 
-const RegistrationSchema = new Schema<IRegistration>(
+const RegistrationSchema = new dynamoose.Schema(
     {
-        eventId: {
-            type: Schema.Types.ObjectId,
-            ref: 'Event',
-            required: true,
-            index: true,
+        id: {
+            type: String,
+            hashKey: true,
+            default: () => uuidv4(),
         },
-        name: { type: String, required: true, trim: true },
-        email: { type: String, required: true, trim: true, lowercase: true },
-        phone: { type: String, required: true, trim: true },
-        tickets: { type: Number, required: true, min: 1, default: 1 },
+        eventId: {
+            type: String,
+            required: true,
+            index: { name: 'eventIdIndex' }
+        },
+        name: { type: String, required: true },
+        email: { type: String, required: true },
+        phone: { type: String, required: true },
+        tickets: { type: Number, required: true, default: 1 },
         status: {
             type: String,
             enum: ['PENDING', 'CONFIRMED', 'CANCELLED'],
             default: 'CONFIRMED',
         },
+        createdAt: { type: Number, default: () => Date.now() },
+        updatedAt: { type: Number, default: () => Date.now() },
     },
     { 
-        timestamps: true,
-        collection: 'registrations'
+        saveUnknown: true
     }
 );
 
-const RegistrationModel: Model<IRegistration> =
-    mongoose.models.Registration ||
-    mongoose.model<IRegistration>('Registration', RegistrationSchema);
+const RegistrationModel = dynamoose.model<IRegistration>('app_registrations', RegistrationSchema, {
+    create: true
+});
 
 export default RegistrationModel;

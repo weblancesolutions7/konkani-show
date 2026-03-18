@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
 import EventModel from '@/models/Event';
-import mongoose from 'mongoose';
 
 interface RouteParams {
     params: Promise<{ id: string }>;
@@ -10,26 +8,23 @@ interface RouteParams {
 // GET /api/events/[id] — Get single event by ID or slug
 export async function GET(request: NextRequest, { params }: RouteParams) {
     try {
-        await dbConnect();
         const { id } = await params;
 
-        let event;
-        if (mongoose.Types.ObjectId.isValid(id)) {
-            event = await EventModel.findById(id).lean();
-        }
+        let event = await EventModel.get(id);
+
         if (!event) {
-            event = await EventModel.findOne({ slug: id }).lean();
+            // If not found by ID (Partition Key), try by slug via query
+            const slugResults = await EventModel.query('slug').eq(id).exec();
+            if (slugResults.length > 0) {
+                event = slugResults[0];
+            }
         }
 
         if (!event) {
             return NextResponse.json({ error: 'Event not found' }, { status: 404 });
         }
 
-        return NextResponse.json({
-            ...event,
-            id: event._id.toString(),
-            _id: undefined,
-        });
+        return NextResponse.json({ ...event });
     } catch (error) {
         console.error('Error fetching event:', error);
         return NextResponse.json(
@@ -42,25 +37,34 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 // PUT /api/events/[id] — Update an event
 export async function PUT(request: NextRequest, { params }: RouteParams) {
     try {
-        await dbConnect();
         const { id } = await params;
         const body = await request.json();
 
-        const event = await EventModel.findByIdAndUpdate(
-            id,
-            { $set: body },
-            { returnDocument: 'after', runValidators: true }
-        ).lean();
+        // Process potential startAt date changes
+        if (body.date && body.time) {
+            try {
+                const [day, month, year] = body.date.split('-').map(Number);
+                const [hours, minutes] = body.time.split(':').map(Number);
+                const dateObj = new Date(year, month - 1, day, hours || 0, minutes || 0);
+                if (!isNaN(dateObj.getTime())) {
+                    body.startAt = dateObj;
+                }
+            } catch (e) {
+                console.error('Error parsing date for startAt:', e);
+            }
+        }
 
-        if (!event) {
+        const existingEvent = await EventModel.get(id);
+        if (!existingEvent) {
             return NextResponse.json({ error: 'Event not found' }, { status: 404 });
         }
 
-        return NextResponse.json({
-            ...event,
-            id: event._id.toString(),
-            _id: undefined,
-        });
+        // prevent updating partitioning keys
+        delete body.id;
+
+        const updatedEvent = await EventModel.update({ id }, body) as any;
+
+        return NextResponse.json({ ...updatedEvent });
     } catch (error) {
         console.error('Error updating event:', error);
         return NextResponse.json(
@@ -73,14 +77,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 // DELETE /api/events/[id] — Delete an event
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
     try {
-        await dbConnect();
         const { id } = await params;
 
-        const event = await EventModel.findByIdAndDelete(id).lean();
-
-        if (!event) {
-            return NextResponse.json({ error: 'Event not found' }, { status: 404 });
-        }
+        await EventModel.delete(id);
 
         return NextResponse.json({ message: 'Event deleted successfully' });
     } catch (error) {

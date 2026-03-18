@@ -23,10 +23,10 @@ export default function SubmitEventPage() {
     const [title, setTitle] = useState('');
     const [date, setDate] = useState('');
     const [time, setTime] = useState('');
-    
+
     // Worldwide Location State
     const [locationData, setLocationData] = useState<LocationData | null>(null);
-    
+
     const [description, setDescription] = useState('');
     const [category, setCategory] = useState('');
     const [entry, setEntry] = useState('');
@@ -65,21 +65,22 @@ export default function SubmitEventPage() {
 
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'ml_default');
 
         try {
-            const response = await fetch(
-                `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'demo'}/image/upload`,
-                { method: 'POST', body: formData }
-            );
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
             const data = await response.json();
             if (data.secure_url) {
                 if (type === 'card') setImageUrl(data.secure_url);
                 else setDetailImageUrl(data.secure_url);
+            } else {
+                throw new Error(data.error || 'Upload failed');
             }
         } catch (error) {
             console.error('Upload failed:', error);
-            alert('Upload failed. Please try again.');
+            alert('Upload failed. Please check your AWS S3 configuration.');
         } finally {
             if (type === 'card') setUploading(false);
             else setDetailUploading(false);
@@ -357,7 +358,7 @@ export default function SubmitEventPage() {
                                     </div>
 
                                     <div className="space-y-4">
-                                        <WorldLocationPicker 
+                                        <WorldLocationPicker
                                             value={locationData || undefined}
                                             onChange={(data) => setLocationData(data)}
                                         />

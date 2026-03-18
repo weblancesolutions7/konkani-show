@@ -1,20 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
-import EventModel from '@/models/Event';
+import EventModel, { generateSlug } from '@/models/Event';
 
 // GET /api/events — List events with optional filters
 export async function GET(request: NextRequest) {
     try {
-        await dbConnect();
-
         const { searchParams } = new URL(request.url);
-        
-        // Ensure indexes are ready
-        await EventModel.syncIndexes().catch(err => console.error('Index sync failed:', err));
 
         const categoriesParam = searchParams.get('category') || searchParams.get('categories');
         const categories = categoriesParam ? categoriesParam.split(',') : [];
-        
+
         const status = searchParams.get('status');
         const locationsParam = searchParams.get('location');
         const locations = locationsParam ? locationsParam.split(',') : [];
@@ -27,45 +21,51 @@ export async function GET(request: NextRequest) {
         const language = searchParams.get('language');
         const minPrice = searchParams.get('minPrice');
         const maxPrice = searchParams.get('maxPrice');
-        const dateFilter = searchParams.get('dateFilter'); // today, tomorrow, weekend, or "YYYY-MM-DD,YYYY-MM-DD"
+        const dateFilter = searchParams.get('dateFilter');
 
-        // Build query filter
-        const filter: Record<string, unknown> = {};
+        const tagsParam = searchParams.get('tag') || searchParams.get('tags');
+        const tags = tagsParam ? tagsParam.split(',') : [];
+
+        // We use .scan() because we have complex and heavily varied filters
+        let scan = EventModel.scan();
 
         if (categories.length > 0) {
-            filter.category = { $in: categories };
+            scan = scan.where('category').in(categories);
         }
 
         if (status) {
-            filter.status = status;
+            scan = scan.where('status').eq(status);
         } else {
-            // Default: only show approved events for public listing
-            filter.status = 'APPROVED';
+            scan = scan.where('status').eq('APPROVED');
         }
 
-        // Tag filtering
-        const tagsParam = searchParams.get('tag') || searchParams.get('tags');
-        const tags = tagsParam ? tagsParam.split(',') : [];
         if (tags.length > 0) {
-            filter.tags = { $in: tags };
+            // Dynamoose scan checking if any tag is in the array. 
+            // Dynamoose .contains() for arrays checks if the array contains the value.
+            // Since `tags` can be multiple, we might need to filter manually if there are multiple tags,
+            // or just use contains for the first tag and filter the rest in memory.
+            scan = scan.where('tags').contains(tags[0]);
         }
 
         if (language) {
             const languages = language.split(',');
-            filter.language = { $in: languages };
+            scan = scan.where('language').in(languages);
         }
 
         if (minPrice || maxPrice) {
-            const priceFilter: any = {};
-            if (minPrice) priceFilter.$gte = parseFloat(minPrice);
-            if (maxPrice) priceFilter.$lte = parseFloat(maxPrice);
-            filter.price = priceFilter;
+            if (minPrice && maxPrice) {
+                scan = scan.where('price').between(parseFloat(minPrice), parseFloat(maxPrice));
+            } else if (minPrice) {
+                scan = scan.where('price').ge(parseFloat(minPrice));
+            } else if (maxPrice) {
+                scan = scan.where('price').le(parseFloat(maxPrice));
+            }
         }
 
         if (dateFilter) {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            
+
             let startDate: Date | null = null;
             let endDate: Date | null = null;
 
@@ -79,10 +79,8 @@ export async function GET(request: NextRequest) {
                 endDate = new Date(startDate);
                 endDate.setHours(23, 59, 59, 999);
             } else if (dateFilter === 'weekend') {
-                const day = today.getDay(); // 0 is Sunday, 6 is Saturday
+                const day = today.getDay();
                 startDate = new Date(today);
-                // Move to Friday or Saturday? Usually "This Weekend" includes Sat/Sun.
-                // Let's say Saturday and Sunday.
                 startDate.setDate(today.getDate() + (6 - day));
                 endDate = new Date(startDate);
                 endDate.setDate(startDate.getDate() + 1);
@@ -102,85 +100,88 @@ export async function GET(request: NextRequest) {
                 }
             }
 
-            if (startDate || endDate) {
-                const rangeQuery: any = {};
-                if (startDate) rangeQuery.$gte = startDate;
-                if (endDate) rangeQuery.$lte = endDate;
-                filter.startAt = rangeQuery;
+            if (startDate && endDate) {
+                scan = scan.where('startAt').between(startDate.getTime(), endDate.getTime());
+            } else if (startDate) {
+                scan = scan.where('startAt').ge(startDate.getTime());
+            } else if (endDate) {
+                scan = scan.where('startAt').le(endDate.getTime());
             }
-        }
-
-        const query = searchParams.get('q') || searchParams.get('search');
-        if (query) {
-            filter.$or = [
-                { title: { $regex: query, $options: 'i' } },
-                { description: { $regex: query, $options: 'i' } },
-                { location: { $regex: query, $options: 'i' } },
-            ];
         }
 
         // Handle specific sort filters that modify the query tag
         if (sort === 'featured' && !tagsParam) {
-            filter.tags = 'Featured';
+            scan = scan.where('tags').contains('Featured');
         }
 
-        // Proximity data for manual sorting
-        const parsedLat = lat ? parseFloat(lat) : NaN;
-        const parsedLng = lng ? parseFloat(lng) : NaN;
-        const hasCoords = !isNaN(parsedLat) && !isNaN(parsedLng);
+        // Execute scan to get the items
+        let allEvents = await scan.exec();
 
-        // Determine Mongoose sort object (only for indexed sorts)
-        const sortOptions: any = {};
-        if (sort === 'popular') sortOptions.views = -1;
-        else if (sort === 'recommended') sortOptions.createdAt = -1;
+        // Cross-filter remaining items in-memory for complex text search or multiple tags
+        const query = searchParams.get('q') || searchParams.get('search');
+        if (query) {
+            const lowerQuery = query.toLowerCase();
+            allEvents = allEvents.filter(ev =>
+                (ev.title && ev.title.toLowerCase().includes(lowerQuery)) ||
+                (ev.description && ev.description.toLowerCase().includes(lowerQuery)) ||
+                (ev.location && ev.location.toLowerCase().includes(lowerQuery))
+            ) as any;
+        }
 
-        // Fetch matching events
-        let allEvents;
-        if (Object.keys(sortOptions).length > 0) {
-            allEvents = await EventModel.find(filter).sort(sortOptions).lean();
-        } else {
-            allEvents = await EventModel.find(filter).lean();
+        // Additional tags filter if multiple tags were requested
+        if (tags.length > 1) {
+            allEvents = allEvents.filter(ev =>
+                tags.every(t => ev.tags && ev.tags.includes(t))
+            ) as any;
         }
 
         let transformed = allEvents.map((event: any) => ({
             ...event,
-            id: event._id.toString(),
-            _id: undefined,
         }));
 
-        // Comprehensive manual sort
-        if (!['popular', 'recommended'].includes(sort || '')) {
-            transformed.sort((a: any, b: any) => {
-                // 1. Proximity Sort (if coordinates available)
-                if (hasCoords && a.locationCoords?.coordinates && b.locationCoords?.coordinates) {
-                    const distA = Math.pow(a.locationCoords.coordinates[0] - parsedLng, 2) + 
-                                Math.pow(a.locationCoords.coordinates[1] - parsedLat, 2);
-                    const distB = Math.pow(b.locationCoords.coordinates[0] - parsedLng, 2) + 
-                                Math.pow(b.locationCoords.coordinates[1] - parsedLat, 2);
-                    if (distA !== distB) return distA - distB;
-                }
+        // Sorting
+        const parsedLat = lat ? parseFloat(lat) : NaN;
+        const parsedLng = lng ? parseFloat(lng) : NaN;
+        const hasCoords = !isNaN(parsedLat) && !isNaN(parsedLng);
 
-                // 2. Location priority (City name match)
-                if (locations.length > 0) {
-                    const aMatch = locations.some(loc => a.location?.toLowerCase().includes(loc.toLowerCase()));
-                    const bMatch = locations.some(loc => b.location?.toLowerCase().includes(loc.toLowerCase()));
-                    if (aMatch && !bMatch) return -1;
-                    if (!aMatch && bMatch) return 1;
-                }
+        transformed.sort((a: any, b: any) => {
+            if (sort === 'popular') {
+                return (b.views || 0) - (a.views || 0);
+            } else if (sort === 'recommended') {
+                const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                return timeB - timeA;
+            }
 
-                // 3. Date priority (Upcoming events first)
-                const timeA = a.startAt ? new Date(a.startAt).getTime() : new Date(`${a.date} ${a.time}`).getTime();
-                const timeB = b.startAt ? new Date(b.startAt).getTime() : new Date(`${b.date} ${b.time}`).getTime();
-                
-                if (!isNaN(timeA) && !isNaN(timeB)) {
-                    if (timeA !== timeB) return timeA - timeB;
-                }
+            // 1. Proximity Sort (if coordinates available)
+            if (hasCoords && a.locationCoords?.coordinates && b.locationCoords?.coordinates) {
+                const distA = Math.pow(a.locationCoords.coordinates[0] - parsedLng, 2) +
+                    Math.pow(a.locationCoords.coordinates[1] - parsedLat, 2);
+                const distB = Math.pow(b.locationCoords.coordinates[0] - parsedLng, 2) +
+                    Math.pow(b.locationCoords.coordinates[1] - parsedLat, 2);
+                if (distA !== distB) return distA - distB;
+            }
 
-                return 0;
-            });
-        }
+            // 2. Location priority (City name match)
+            if (locations.length > 0) {
+                const aMatch = locations.some(loc => a.location?.toLowerCase().includes(loc.toLowerCase()));
+                const bMatch = locations.some(loc => b.location?.toLowerCase().includes(loc.toLowerCase()));
+                if (aMatch && !bMatch) return -1;
+                if (!aMatch && bMatch) return 1;
+            }
 
-    return NextResponse.json(transformed);
+            // 3. Date priority (Upcoming events first)
+            const timeA = a.startAt ? a.startAt : new Date(`${a.date} ${a.time}`).getTime();
+            const timeB = b.startAt ? b.startAt : new Date(`${b.date} ${b.time}`).getTime();
+
+            if (!isNaN(timeA) && !isNaN(timeB)) {
+                if (timeA !== timeB) return timeA - timeB;
+            }
+
+            return 0;
+        });
+
+        return NextResponse.json(transformed);
     } catch (error: any) {
         console.error('CRITICAL: API Error matching events:', error);
         return NextResponse.json(
@@ -193,15 +194,27 @@ export async function GET(request: NextRequest) {
 // POST /api/events — Create a new event
 export async function POST(request: NextRequest) {
     try {
-        await dbConnect();
-
         const body = await request.json();
 
-        const event = new EventModel({
+        let startAt: number | undefined;
+        try {
+            const [day, month, year] = body.date.split('-').map(Number);
+            const [hours, minutes] = body.time.split(':').map(Number);
+            const dateObj = new Date(year, month - 1, day, hours || 0, minutes || 0);
+            if (!isNaN(dateObj.getTime())) {
+                startAt = dateObj.getTime();
+            }
+        } catch (e) {
+            console.error('Error parsing date for startAt:', e);
+        }
+
+        const newEvent = new EventModel({
             title: body.title,
+            slug: generateSlug(body.title),
             description: body.description || '',
             date: body.date,
             time: body.time,
+            startAt,
             location: body.location,
             locationDetails: body.locationDetails,
             locationCoords: body.locationCoords,
@@ -214,15 +227,10 @@ export async function POST(request: NextRequest) {
             status: 'PENDING',
         });
 
-        await event.save();
+        await newEvent.save();
 
-        const eventObj = event.toObject();
         return NextResponse.json(
-            {
-                ...eventObj,
-                id: eventObj._id.toString(),
-                _id: undefined,
-            },
+            { ...newEvent },
             { status: 201 }
         );
     } catch (error) {

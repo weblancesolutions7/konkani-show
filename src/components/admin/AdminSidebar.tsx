@@ -1,10 +1,17 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { signOut } from '@/lib/auth';
 
-export default function AdminSidebar({ onSeedData }: { onSeedData?: () => void }) {
+export default function AdminSidebar() {
     const pathname = usePathname();
+    const router = useRouter();
+
+    const handleLogout = () => {
+        signOut();
+        router.push('/admin/login');
+    };
 
     const navItems = [
         { label: 'Events Dashboard', href: '/admin', icon: '📋' },
@@ -40,20 +47,19 @@ export default function AdminSidebar({ onSeedData }: { onSeedData?: () => void }
             </nav>
 
             <div className="mt-auto pt-6 space-y-3">
-                {onSeedData && (
-                    <button
-                        onClick={onSeedData}
-                        className="w-full px-4 py-3 bg-amber-50 border border-amber-200 text-amber-700  font-bold hover:shadow-md transition-all text-sm flex items-center gap-2"
-                    >
-                        🌱 Seed Data
-                    </button>
-                )}
+
                 <Link
                     href="/submit-event"
-                    className="w-full px-4 py-3 bg-primary text-white  font-bold shadow-lg hover:bg-primary-dark transition-all text-sm flex items-center justify-center gap-2"
+                    className="w-full px-4 py-3 bg-primary/10 text-primary  font-bold hover:bg-primary/20 transition-all text-sm flex items-center justify-center gap-2"
                 >
                     ➕ Create Event
                 </Link>
+                <button
+                    onClick={handleLogout}
+                    className="w-full px-4 py-3 bg-rose-50 text-rose-600 border border-rose-100 font-bold hover:bg-rose-100 transition-all text-sm flex items-center justify-center gap-2"
+                >
+                    🚪 Sign Out
+                </button>
             </div>
         </aside>
     );

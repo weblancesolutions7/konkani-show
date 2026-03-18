@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
 import EventModel from '@/models/Event';
-import mongoose from 'mongoose';
 
 interface RouteParams {
     params: Promise<{ id: string }>;
@@ -12,24 +10,19 @@ export async function POST(
     { params }: RouteParams
 ) {
     try {
-        await dbConnect();
-        
         const { id } = await params;
 
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return NextResponse.json({ error: 'Invalid event ID' }, { status: 400 });
-        }
-
-        // Atomically increment the views counter by 1
-        const updatedEvent = await EventModel.findByIdAndUpdate(
-            id,
-            { $inc: { views: 1 } },
-            { new: true, runValidators: false }
-        ).lean();
-
-        if (!updatedEvent) {
+        const event = await EventModel.get(id);
+        
+        if (!event) {
             return NextResponse.json({ error: 'Event not found' }, { status: 404 });
         }
+
+        // Increment views
+        const updatedEvent = await EventModel.update(
+            { id },
+            { $ADD: { views: 1 } }
+        );
 
         return NextResponse.json({ 
             success: true, 

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
 import EventModel from '@/models/Event';
 
 interface RouteParams {
@@ -9,7 +8,6 @@ interface RouteParams {
 // PATCH /api/events/[id]/status — Update event status (approve/reject/delete)
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
     try {
-        await dbConnect();
         const { id } = await params;
         const body = await request.json();
 
@@ -21,21 +19,18 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
             );
         }
 
-        const event = await EventModel.findByIdAndUpdate(
-            id,
-            { status: body.status },
-            { returnDocument: 'after' }
-        ).lean();
+        const event = await EventModel.get(id);
 
         if (!event) {
             return NextResponse.json({ error: 'Event not found' }, { status: 404 });
         }
 
-        return NextResponse.json({
-            ...event,
-            id: event._id.toString(),
-            _id: undefined,
-        });
+        const updatedEvent = await EventModel.update(
+            { id },
+            { status: body.status }
+        ) as any;
+
+        return NextResponse.json({ ...updatedEvent });
     } catch (error) {
         console.error('Error updating event status:', error);
         return NextResponse.json(

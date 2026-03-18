@@ -146,12 +146,120 @@ function EditModal({ event, onClose, onSave }: { event: Event; onClose: () => vo
     );
 }
 
+// Preview Modal Component
+function PreviewModal({ 
+    event, 
+    onClose, 
+    onApprove, 
+    onReject, 
+    onEdit 
+}: { 
+    event: Event; 
+    onClose: () => void; 
+    onApprove?: () => void;
+    onReject?: () => void;
+    onEdit: () => void;
+}) {
+    return (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto" onClick={onClose}>
+            <div className="bg-white shadow-2xl max-w-4xl w-full my-8 min-h-[50vh] flex flex-col md:flex-row overflow-hidden border border-surface-200" onClick={(e) => e.stopPropagation()}>
+                {/* Left: Visual Content */}
+                <div className="md:w-1/2 bg-surface-100 relative min-h-[300px]">
+                    <img 
+                        src={event.detailImage || event.featureImage} 
+                        alt={event.title} 
+                        className="w-full h-full object-cover" 
+                    />
+                    <div className="absolute top-4 left-4 flex gap-2">
+                        <span className="px-3 py-1 bg-primary text-white text-[10px] font-black uppercase tracking-widest">{event.category}</span>
+                        {event.status === 'PENDING' && (
+                            <span className="px-3 py-1 bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest">Pending Review</span>
+                        )}
+                    </div>
+                </div>
+
+                {/* Right: Details & Actions */}
+                <div className="md:w-1/2 p-8 flex flex-col">
+                    <div className="flex justify-between items-start mb-6">
+                        <div>
+                            <h2 className="text-3xl font-black leading-tight mb-2">{event.title}</h2>
+                            <p className="text-primary font-bold">{event.date} • {event.time}</p>
+                            <p className="text-surface-800/60 font-medium text-sm">{event.location}</p>
+                        </div>
+                        <button onClick={onClose} className="w-8 h-8 flex items-center justify-center hover:bg-surface-100 transition-colors font-bold text-lg">✕</button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto pr-2 mb-8 max-h-[400px]">
+                        <div className="space-y-6">
+                            <section>
+                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-surface-400 mb-2">About Event</h3>
+                                <p className="text-surface-800 text-sm leading-relaxed whitespace-pre-wrap">{event.description}</p>
+                            </section>
+
+                            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-surface-100">
+                                <div>
+                                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-surface-400 mb-1">Entry Fee</h3>
+                                    <p className="font-bold text-primary">{event.entry || 'Free Entry'}</p>
+                                </div>
+                                {event.meetingLink && (
+                                    <div>
+                                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-surface-400 mb-1">Meeting Link</h3>
+                                        <a href={event.meetingLink} target="_blank" className="text-xs font-bold text-blue-600 truncate block hover:underline">{event.meetingLink}</a>
+                                    </div>
+                                )}
+                            </div>
+
+                            {event.tags && event.tags.length > 0 && (
+                                <div className="pt-4 border-t border-surface-100">
+                                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-surface-400 mb-2">Tags</h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {event.tags.map(tag => (
+                                            <span key={tag} className="px-2 py-1 bg-surface-100 text-[10px] font-bold text-surface-600 uppercase">#{tag}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Footer Actions */}
+                    <div className="pt-6 border-t border-surface-100 flex flex-wrap gap-3">
+                        {onApprove && event.status === 'PENDING' && (
+                            <button 
+                                onClick={onApprove}
+                                className="flex-1 px-6 py-3 bg-emerald-600 text-white font-black text-xs uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20"
+                            >
+                                Approve Event
+                            </button>
+                        )}
+                        {onReject && event.status === 'PENDING' && (
+                            <button 
+                                onClick={onReject}
+                                className="flex-1 px-6 py-3 bg-rose-600 text-white font-black text-xs uppercase tracking-widest hover:bg-rose-700 transition-all shadow-lg shadow-rose-600/20"
+                            >
+                                Reject
+                            </button>
+                        )}
+                        <button 
+                            onClick={onEdit}
+                            className="px-6 py-3 bg-surface-100 text-surface-800 font-black text-xs uppercase tracking-widest hover:bg-surface-200 transition-all"
+                        >
+                            Edit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 import AdminSidebar from '@/components/admin/AdminSidebar';
 
 export default function AdminDashboard() {
     const [activeTab, setActiveTab] = useState<AdminTab>('PENDING');
     const [events, setEvents] = useState<Event[]>([]);
     const [loading, setLoading] = useState(true);
+    const [previewEvent, setPreviewEvent] = useState<Event | null>(null);
     const [editingEvent, setEditingEvent] = useState<Event | null>(null);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
 
@@ -231,25 +339,20 @@ export default function AdminDashboard() {
 
     const handleEdit = (id: string) => {
         const event = events.find(e => e.id === id);
-        if (event) setEditingEvent(event);
+        if (event) {
+            setEditingEvent(event);
+            setPreviewEvent(null);
+        }
     };
 
-    const handleSeedData = async () => {
-        if (!confirm('This will reset all events and seed sample data. Continue?')) return;
-        try {
-            const response = await fetch(API_ROUTES.SEED, { method: 'POST' });
-            if (!response.ok) throw new Error('Failed to seed');
-            alert('Database seeded successfully!');
-            fetchEvents(activeTab);
-        } catch (error) {
-            console.error('Seed failed:', error);
-            alert('Failed to seed database.');
-        }
+    const handlePreview = (id: string) => {
+        const event = events.find(e => e.id === id);
+        if (event) setPreviewEvent(event);
     };
 
     return (
         <div className="flex min-h-screen bg-surface-100">
-            <AdminSidebar onSeedData={handleSeedData} />
+            <AdminSidebar />
             
             <main className="flex-1 py-12 px-10">
                 <div className="max-w-6xl mx-auto">
@@ -287,8 +390,26 @@ export default function AdminDashboard() {
                                 onReject={handleReject}
                                 onDelete={handleDelete}
                                 onEdit={handleEdit}
+                                onPreview={handlePreview}
                             />
                         )}
+                        {/* Preview Modal */}
+                        {previewEvent && (
+                            <PreviewModal
+                                event={previewEvent}
+                                onClose={() => setPreviewEvent(null)}
+                                onApprove={() => {
+                                    handleApprove(previewEvent.id);
+                                    setPreviewEvent(null);
+                                }}
+                                onReject={() => {
+                                    handleReject(previewEvent.id);
+                                    setPreviewEvent(null);
+                                }}
+                                onEdit={() => handleEdit(previewEvent.id)}
+                            />
+                        )}
+
                         {/* Edit Modal */}
                         {editingEvent && (
                             <EditModal

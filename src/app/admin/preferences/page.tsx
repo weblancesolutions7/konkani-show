@@ -12,7 +12,6 @@ export default function PreferencesPage() {
     const [activeManager, setActiveManager] = useState<'TAGS' | 'CATEGORIES' | 'CITIES' | 'FEATURED'>('TAGS');
     const [newTag, setNewTag] = useState('');
     const [newCategory, setNewCategory] = useState('');
-    const [newCity, setNewCity] = useState('');
     const [isSaving, setIsSaving] = useState(false);
 
     // Hero Manager State
@@ -108,47 +107,6 @@ export default function PreferencesPage() {
         }
     };
 
-    const handleAddCity = async () => {
-        if (!newCity.trim() || !preferences) return;
-        const cityExists = (preferences.cities || []).some(c => c.toLowerCase() === newCity.trim().toLowerCase());
-        if (cityExists) {
-            alert('City already exists');
-            return;
-        }
-
-        const updatedPrefs = {
-            ...preferences,
-            cities: [...(preferences.cities || []), newCity.trim()]
-        };
-
-        setIsSaving(true);
-        try {
-            await updatePreferences(updatedPrefs);
-            setNewCity('');
-        } catch (err) {
-            alert('Failed to add city');
-        } finally {
-            setIsSaving(false);
-        }
-    };
-
-    const handleDeleteCity = async (cityName: string) => {
-        if (!preferences) return;
-        const updatedPrefs = {
-            ...preferences,
-            cities: (preferences.cities || []).filter(c => c !== cityName)
-        };
-
-        setIsSaving(true);
-        try {
-            await updatePreferences(updatedPrefs);
-        } catch (err) {
-            alert('Failed to delete city');
-        } finally {
-            setIsSaving(false);
-        }
-    };
-
     const getImageDimensions = (file: File): Promise<{ width: number; height: number }> => {
         return new Promise((resolve) => {
             const img = new Image();
@@ -173,20 +131,21 @@ export default function PreferencesPage() {
         setIsUploadingHero(true);
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'ml_default');
 
         try {
-            const response = await fetch(
-                `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'demo'}/image/upload`,
-                { method: 'POST', body: formData }
-            );
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
             const data = await response.json();
             if (data.secure_url) {
                 setHeroForm(prev => ({ ...prev, featuredImage: data.secure_url }));
+            } else {
+                throw new Error(data.error || 'Upload failed');
             }
         } catch (error) {
             console.error('Upload failed:', error);
-            alert('Upload failed. Please try again or use a URL.');
+            alert('Upload failed. Please check your AWS S3 configuration.');
         } finally {
             setIsUploadingHero(false);
         }
@@ -297,10 +256,10 @@ export default function PreferencesPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                         <nav className="space-y-2">
-                            {(['TAGS', 'CATEGORIES', 'CITIES', 'FEATURED'] as const).map(manager => (
+                            {(['TAGS', 'CATEGORIES', 'FEATURED'] as const).map(manager => (
                                 <button
                                     key={manager}
-                                    onClick={() => setActiveManager(manager)}
+                                    onClick={() => setActiveManager(manager as 'TAGS' | 'CATEGORIES' | 'FEATURED')}
                                     className={`w-full text-left px-5 py-3  font-bold transition-all ${activeManager === manager
                                         ? 'bg-white text-primary shadow-sm border-l-4 border-primary'
                                         : 'bg-surface-50 border border-surface-200 text-surface-800/60 hover:border-primary/50'
@@ -388,41 +347,6 @@ export default function PreferencesPage() {
                                                             🗑️
                                                         </button>
                                                     </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {activeManager === 'CITIES' && (
-                                    <div className="space-y-6">
-                                        <h2 className="text-xl font-black">Cities</h2>
-                                        <div className="flex gap-2">
-                                            <input
-                                                type="text"
-                                                value={newCity}
-                                                onChange={(e) => setNewCity(e.target.value)}
-                                                placeholder="New city name..."
-                                                className="flex-1 px-4 py-2  border border-surface-200 outline-none focus:border-primary"
-                                                onKeyDown={(e) => e.key === 'Enter' && handleAddCity()}
-                                            />
-                                            <button
-                                                onClick={handleAddCity}
-                                                className="px-6 py-2 bg-primary text-white font-bold "
-                                            >
-                                                Add
-                                            </button>
-                                        </div>
-                                        <div className="space-y-3">
-                                            {preferences?.cities?.map(city => (
-                                                <div key={city} className="flex items-center justify-between p-4 bg-surface-50  border border-surface-100">
-                                                    <span className="font-bold">{city}</span>
-                                                    <button
-                                                        onClick={() => handleDeleteCity(city)}
-                                                        className="text-surface-800/20 hover:text-rose-500 transition-colors"
-                                                    >
-                                                        🗑️
-                                                    </button>
                                                 </div>
                                             ))}
                                         </div>

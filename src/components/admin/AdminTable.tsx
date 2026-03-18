@@ -11,9 +11,10 @@ interface AdminTableProps {
     onReject?: (id: string) => void;
     onDelete?: (id: string) => void;
     onEdit?: (id: string) => void;
+    onPreview?: (id: string) => void;
 }
 
-const AdminTable: React.FC<AdminTableProps> = ({ events, onApprove, onReject, onDelete, onEdit }) => {
+const AdminTable: React.FC<AdminTableProps> = ({ events, onApprove, onReject, onDelete, onEdit, onPreview }) => {
     return (
         <div className="w-full overflow-x-auto  border border-surface-200 bg-surface-50">
             <table className="w-full border-collapse text-left">
@@ -56,14 +57,24 @@ const AdminTable: React.FC<AdminTableProps> = ({ events, onApprove, onReject, on
                                         {onReject && event.status === 'PENDING' && (
                                             <button onClick={() => onReject(event.id)} className="p-2 bg-rose-100 text-rose-700  hover:bg-rose-200 transition-colors text-xs font-bold">Reject</button>
                                         )}
-                                        <a 
-                                            href={`/event/${event.slug}`} 
-                                            target="_blank" 
-                                            rel="noopener noreferrer"
-                                            className="p-2 bg-surface-100 text-surface-800 hover:bg-surface-200 transition-colors text-xs font-bold"
-                                        >
-                                            View
-                                        </a>
+                                        {onPreview && (
+                                            <button 
+                                                onClick={() => onPreview(event.id)} 
+                                                className="p-2 bg-surface-100 text-surface-800 hover:bg-surface-200 transition-colors text-xs font-bold"
+                                            >
+                                                Review
+                                            </button>
+                                        )}
+                                        {!onPreview && (
+                                            <a 
+                                                href={`/event/${event.slug}`} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className="p-2 bg-surface-100 text-surface-800 hover:bg-surface-200 transition-colors text-xs font-bold"
+                                            >
+                                                View
+                                            </a>
+                                        )}
                                         {onEdit && (
                                             <button onClick={() => onEdit(event.id)} className="p-2 bg-blue-100 text-blue-700  hover:bg-blue-200 transition-colors text-xs font-bold">Edit</button>
                                         )}

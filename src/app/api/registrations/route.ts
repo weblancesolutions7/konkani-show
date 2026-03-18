@@ -1,12 +1,10 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
 import RegistrationModel from '@/models/Registration';
 import EventModel from '@/models/Event';
-import mongoose from 'mongoose';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(req: Request) {
     try {
-        await connectDB();
         const body = await req.json();
 
         const { eventId, name, email, phone, tickets } = body;
@@ -19,15 +17,8 @@ export async function POST(req: Request) {
             );
         }
 
-        if (!mongoose.Types.ObjectId.isValid(eventId)) {
-            return NextResponse.json(
-                { success: false, error: 'Invalid event ID' },
-                { status: 400 }
-            );
-        }
-
         // Check if event exists
-        const event = await EventModel.findById(eventId);
+        const event = await EventModel.get(eventId);
         if (!event) {
             return NextResponse.json(
                 { success: false, error: 'Event not found' },
@@ -36,7 +27,8 @@ export async function POST(req: Request) {
         }
 
         // Create Registration
-        const registration = await RegistrationModel.create({
+        const registration = new RegistrationModel({
+            id: uuidv4(),
             eventId,
             name,
             email,
@@ -45,7 +37,9 @@ export async function POST(req: Request) {
             status: 'CONFIRMED', // default as per requirements
         });
 
-        return NextResponse.json({ success: true, data: registration }, { status: 201 });
+        await registration.save();
+
+        return NextResponse.json({ success: true, data: { ...registration } }, { status: 201 });
     } catch (error: any) {
         console.error('Registration error:', error);
         return NextResponse.json(

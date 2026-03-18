@@ -1,12 +1,15 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import dynamoose from '@/lib/dynamodb';
+import { Item } from 'dynamoose/dist/Item';
+import { v4 as uuidv4 } from 'uuid';
 
-export interface IEvent extends Document {
+export interface IEvent extends Item {
+    id: string;
     title: string;
     slug: string;
     description: string;
     date: string;
     time: string;
-    startAt?: Date;
+    startAt?: number;
     location: string;
     locationDetails?: {
         venueAddress?: string;
@@ -31,11 +34,11 @@ export interface IEvent extends Document {
     meetingLink?: string;
     status: 'PENDING' | 'APPROVED' | 'DELETED' | 'REJECTED';
     views: number;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt?: number;
+    updatedAt?: number;
 }
 
-function generateSlug(title: string): string {
+export function generateSlug(title: string): string {
     return title
         .toLowerCase()
         .replace(/[^a-z0-9\s-]/g, '')
@@ -45,38 +48,52 @@ function generateSlug(title: string): string {
         + '-' + Date.now().toString(36);
 }
 
-const EventSchema = new Schema<IEvent>(
+const locationDetailsSchema = new dynamoose.Schema({
+    venueAddress: { type: String },
+    city: { type: String },
+    state: { type: String },
+    country: { type: String },
+    zipCode: { type: String },
+});
+
+const EventSchema = new dynamoose.Schema(
     {
-        title: { type: String, required: true, trim: true },
-        slug: { type: String, unique: true, index: true },
+        id: {
+            type: String,
+            hashKey: true,
+            default: () => uuidv4(),
+        },
+        title: { type: String, required: true },
+        slug: {
+            type: String,
+            index: { name: 'slugIndex' }
+        },
         description: { type: String, required: true },
         date: { type: String, required: true },
         time: { type: String, required: true },
-        startAt: { type: Date, index: true },
+        startAt: {
+            type: Number
+        },
         location: { type: String, required: true },
         locationDetails: {
-            venueAddress: { type: String },
-            city: { type: String },
-            state: { type: String },
-            country: { type: String },
-            zipCode: { type: String },
+            type: Object,
+            schema: locationDetailsSchema,
         },
         locationCoords: {
-            type: {
-                type: String,
-                enum: ['Point'],
-                required: false,
-            },
-            coordinates: {
-                type: [Number],
-                required: false,
+            type: Object,
+            schema: {
+                type: { type: String, default: 'Point' },
+                coordinates: {
+                    type: Array,
+                    schema: [Number],
+                }
             }
         },
         category: { type: String, required: true },
-        tags: { type: [String], default: [] },
+        tags: { type: Array, schema: [String], default: [] },
         featureImage: { type: String, required: true },
         detailImage: { type: String },
-        gallery: { type: [String], default: [] },
+        gallery: { type: Array, schema: [String], default: [] },
         entry: { type: String, default: '' },
         price: { type: Number, default: 0 },
         currency: { type: String, default: 'INR' },
@@ -88,44 +105,16 @@ const EventSchema = new Schema<IEvent>(
             default: 'PENDING',
         },
         views: { type: Number, default: 0 },
+        createdAt: { type: Number, default: () => Date.now() },
+        updatedAt: { type: Number, default: () => Date.now() },
     },
-    { 
-        timestamps: true,
-        collection: 'events',
-        autoIndex: true
+    {
+        saveUnknown: true
     }
 );
 
-// Add 2dsphere index for geolocation queries
-EventSchema.index({ locationCoords: '2dsphere' });
-
-// Add index for fast sorting by popularity
-EventSchema.index({ views: -1 });
-
-// Auto-generate slug and parse date before saving
-EventSchema.pre('save', async function () {
-    if (!this.slug || this.isModified('title')) {
-        this.slug = generateSlug(this.title);
-    }
-
-    if (this.isModified('date') || this.isModified('time')) {
-        try {
-            // Our date is DD-MM-YYYY, time is HH:mm
-            const [day, month, year] = this.date.split('-').map(Number);
-            const [hours, minutes] = this.time.split(':').map(Number);
-            const dateObj = new Date(year, month - 1, day, hours || 0, minutes || 0);
-            if (!isNaN(dateObj.getTime())) {
-                this.startAt = dateObj;
-            }
-        } catch (e) {
-            console.error('Error parsing date for startAt:', e);
-        }
-    }
+const EventModel = dynamoose.model<IEvent>('app_events', EventSchema, {
+    create: true // Auto-create actual DB table locally
 });
-
-if (mongoose.models.Event) {
-    delete mongoose.models.Event;
-}
-const EventModel: Model<IEvent> = mongoose.model<IEvent>('Event', EventSchema);
 
 export default EventModel;
