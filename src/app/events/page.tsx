@@ -85,13 +85,13 @@ export default function EventsPage() {
 
                         <div className="space-y-16">
                             {loading ? (
-                                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
                                     {Array.from({ length: 8 }).map((_, i) => (
                                         <div key={i} className="aspect-[2/3]  bg-surface-200 animate-pulse" />
                                     ))}
                                 </div>
                             ) : events.length > 0 ? (
-                                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
                                     {events.map(event => (
                                         <EventSearchCard key={event.id} event={event} />
                                     ))}

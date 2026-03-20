@@ -16,7 +16,7 @@ const EventCard = dynamic(() => import('@/components/ui/EventCard'), {
 });
 
 const FeaturedCategoryCard = dynamic(() => import('@/components/ui/FeaturedCategoryCard'), {
-  loading: () => <div className="aspect-square md:aspect-[4/5]  bg-surface-200 animate-pulse" />,
+  loading: () => <div className="aspect-square rounded-2xl bg-surface-200 animate-pulse" />,
 });
 
 export default function HomePage() {
@@ -103,7 +103,7 @@ export default function HomePage() {
             ) : recommendedEvents.length > 0 ? (
               <ScrollRow>
                 {recommendedEvents.map(event => (
-                    <div key={event.id} className="flex w-[180px] md:w-[260px] snap-start shrink-0">
+                    <div key={event.id} className="flex w-[180px] md:w-[220px] snap-start shrink-0">
                         <EventCard event={event} />
                     </div>
                 ))}
@@ -131,7 +131,7 @@ export default function HomePage() {
             ) : nearbyEvents.length > 0 ? (
                 <ScrollRow>
                     {nearbyEvents.map(event => (
-                        <div key={event.id} className="flex w-[180px] md:w-[260px] snap-start shrink-0">
+                        <div key={event.id} className="flex w-[180px] md:w-[220px] snap-start shrink-0">
                             <EventCard event={event} />
                         </div>
                     ))}
@@ -182,7 +182,7 @@ export default function HomePage() {
             ) : popularEvents.length > 0 ? (
               <ScrollRow>
                 {popularEvents.map(event => (
-                    <div key={event.id} className="flex w-[180px] md:w-[260px] snap-start shrink-0">
+                    <div key={event.id} className="flex w-[180px] md:w-[220px] snap-start shrink-0">
                         <EventCard event={event} />
                     </div>
                 ))}
@@ -209,7 +209,7 @@ export default function HomePage() {
             ) : featuredEvents.length > 0 ? (
               <ScrollRow>
                 {featuredEvents.map(event => (
-                    <div key={event.id} className="flex w-[180px] md:w-[260px] snap-start shrink-0">
+                    <div key={event.id} className="flex w-[180px] md:w-[220px] snap-start shrink-0">
                         <EventCard event={event} />
                     </div>
                 ))}

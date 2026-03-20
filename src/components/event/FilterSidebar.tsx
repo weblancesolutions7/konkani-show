@@ -107,7 +107,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
               <button
                 key={d}
                 onClick={() => handleDateChange(d.toLowerCase().replace(' ', ''))}
-                className={`px-4 py-1.5  border text-sm font-medium transition-all ${
+                className={`px-4 py-1.5 rounded-lg border text-sm font-medium transition-all ${
                   filters.date === d.toLowerCase().replace(' ', '')
                     ? 'bg-primary/10 text-primary border-primary'
                     : 'bg-white text-surface-600 border-surface-100 hover:border-surface-300'
@@ -139,7 +139,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
                             type="date" 
                             value={dateRange.start}
                             onChange={(e) => handleRangeChange('start', e.target.value)}
-                            className="w-full px-4 py-2  border border-surface-200 text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
+                            className="w-full px-4 py-2 rounded-lg border border-surface-200 text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
                         />
                     </div>
                     <div className="space-y-1">
@@ -148,7 +148,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
                             type="date" 
                             value={dateRange.end}
                             onChange={(e) => handleRangeChange('end', e.target.value)}
-                            className="w-full px-4 py-2  border border-surface-200 text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
+                            className="w-full px-4 py-2 rounded-lg border border-surface-200 text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
                         />
                     </div>
                 </div>
@@ -217,7 +217,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
               <button
                 key={p}
                 onClick={() => handlePriceClick(p as 'Free' | 'Paid')}
-                className={`flex-1 py-1.5  border text-sm font-medium transition-all ${
+                className={`flex-1 py-1.5 rounded-lg border text-sm font-medium transition-all ${
                   (p === 'Free' && filters.priceRange[0] === 0 && filters.priceRange[1] === 0 && filters.date !== '') || // This is tricky, let's use a simpler check
                   (p === 'Free' && filters.priceRange[0] === 0 && filters.priceRange[1] === 0 && expanded.includes('price') && filters.priceRange[1] === 0) ||
                   (p === 'Paid' && filters.priceRange[0] > 0)
@@ -244,7 +244,7 @@ const FilterAccordion: React.FC<{
     onClear: () => void;
     isDirty: boolean;
 }> = ({ title, children, isOpen, onToggle, onClear, isDirty }) => (
-  <div className="bg-white  border border-surface-200 shadow-sm overflow-hidden transition-all duration-300">
+  <div className="bg-white rounded-lg border border-surface-200 shadow-sm overflow-hidden transition-all duration-300">
     <button 
       onClick={onToggle}
       className="w-full px-5 py-4 flex items-center justify-between group"

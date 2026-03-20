@@ -14,7 +14,7 @@ const Header = () => {
     const [isSearchingCity, setIsSearchingCity] = useState(false);
     const [citySearchResults, setCitySearchResults] = useState<any[]>([]);
     const [recentCities, setRecentCities] = useState<string[]>([]);
-    
+
     const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
@@ -58,10 +58,10 @@ const Header = () => {
         }
 
         if (savedRecent) {
-             try {
+            try {
                 const parsed = JSON.parse(savedRecent);
                 if (Array.isArray(parsed)) setRecentCities(parsed);
-             } catch(e) {}
+            } catch (e) { }
         }
 
         // Auto-select precise location if available AND user hasn't made a manual selection
@@ -70,9 +70,9 @@ const Header = () => {
             localStorage.setItem('selectedCities', JSON.stringify([location.city]));
             // Also add to recents
             if (!savedRecent?.includes(location.city)) {
-                 const newRecents = [location.city].slice(0, 5);
-                 setRecentCities(newRecents);
-                 localStorage.setItem('recentCities', JSON.stringify(newRecents));
+                const newRecents = [location.city].slice(0, 5);
+                setRecentCities(newRecents);
+                localStorage.setItem('recentCities', JSON.stringify(newRecents));
             }
             window.dispatchEvent(new Event('cityChange'));
         }
@@ -111,8 +111,8 @@ const Header = () => {
     }, [citySearch, searchDynamicCities]);
 
     const toggleCity = (cityOrLocationObj: any) => {
-        const cityName = typeof cityOrLocationObj === 'string' 
-            ? cityOrLocationObj 
+        const cityName = typeof cityOrLocationObj === 'string'
+            ? cityOrLocationObj
             : (cityOrLocationObj.name || cityOrLocationObj.display_name.split(',')[0]);
 
         let newCities: string[];
@@ -126,7 +126,7 @@ const Header = () => {
 
         setSelectedCities(newCities);
         localStorage.setItem('selectedCities', JSON.stringify(newCities));
-        
+
         // Update recents
         const newRecents = [cityName, ...recentCities.filter(c => c !== cityName)].slice(0, 5);
         setRecentCities(newRecents);
@@ -174,7 +174,7 @@ const Header = () => {
                             placeholder="Search for Events and Shows"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-12 pr-4 py-2.5 bg-white/10 backdrop-blur-xl border border-white/20  focus:outline-none focus:ring-2 focus:ring-white/40 text-sm text-white placeholder:text-white/50 transition-all duration-300 focus:bg-white/20 group-hover:border-white/40 shadow-inner"
+                            className="w-full pl-12 pr-4 py-2.5 bg-white/10 backdrop-blur-xl border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/40 text-sm text-white placeholder:text-white/50 transition-all duration-300 focus:bg-white/20 group-hover:border-white/40 shadow-inner"
                         />
                         <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60 group-focus-within:text-white group-hover:scale-110 transition-transform">
                             <Search size={18} strokeWidth={2.5} />
@@ -246,7 +246,7 @@ const Header = () => {
                                     </div>
 
                                     <div className="max-h-64 overflow-y-auto">
-                                        
+
                                         {/* Dynamic Search Results */}
                                         {citySearch.length > 2 ? (
                                             <div>
@@ -254,15 +254,16 @@ const Header = () => {
                                                 {citySearchResults.map((result, idx) => {
                                                     const cityName = result.name || result.display_name.split(',')[0];
                                                     return (
-                                                    <button
-                                                        key={idx}
-                                                        onClick={() => toggleCity(result)}
-                                                        className="w-full text-left px-4 py-2.5 transition-colors hover:bg-surface-50 border-b border-surface-50 last:border-0"
-                                                    >
-                                                        <p className="text-sm font-bold text-[#333333]">{cityName}</p>
-                                                        <p className="text-[10px] text-surface-500 truncate">{result.display_name}</p>
-                                                    </button>
-                                                )})}
+                                                        <button
+                                                            key={idx}
+                                                            onClick={() => toggleCity(result)}
+                                                            className="w-full text-left px-4 py-2.5 transition-colors hover:bg-surface-50 border-b border-surface-50 last:border-0"
+                                                        >
+                                                            <p className="text-sm font-bold text-[#333333]">{cityName}</p>
+                                                            <p className="text-[10px] text-surface-500 truncate">{result.display_name}</p>
+                                                        </button>
+                                                    )
+                                                })}
                                                 {!isSearchingCity && citySearchResults.length === 0 && (
                                                     <div className="px-4 py-8 text-center text-xs font-medium text-surface-400">
                                                         No cities found matching "{citySearch}"
@@ -278,9 +279,9 @@ const Header = () => {
                                                     }}
                                                     className="w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-primary/5 transition-colors border-b border-surface-50 group"
                                                 >
-                                                <div className="text-primary">
-                                                    <MapPin size={16} strokeWidth={2.5} />
-                                                </div>
+                                                    <div className="text-primary">
+                                                        <MapPin size={16} strokeWidth={2.5} />
+                                                    </div>
                                                     <div>
                                                         <p className="text-xs font-black text-primary uppercase tracking-widest">Current Location</p>
                                                         <p className="text-sm font-bold text-surface-900 group-hover:text-primary transition-colors">{location?.city || 'Detecting...'}</p>
@@ -325,9 +326,9 @@ const Header = () => {
                         </div>
 
 
-                        <Link 
-                            href="/submit-event" 
-                            className="relative px-6 py-2.5 bg-surface-50 text-primary text-[14px] font-black  hover:bg-surface-100 transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.3)] active:scale-95 group overflow-hidden hidden sm:block"
+                        <Link
+                            href="/submit-event"
+                            className="relative px-6 py-2.5 bg-surface-50 text-primary text-[14px] font-black rounded-lg hover:bg-surface-100 transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.3)] active:scale-95 group overflow-hidden hidden sm:block"
                         >
                             <span className="relative z-10">List Your Show</span>
                             <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/40 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
@@ -335,21 +336,21 @@ const Header = () => {
 
                         {/* Mobile Search Toggle */}
                         <button className="md:hidden p-2 text-white/80 hover:text-white hover:bg-white/10  transition-all">
-                                <Search size={22} strokeWidth={2.5} />
+                            <Search size={22} strokeWidth={2.5} />
                         </button>
                     </div>
                 </div>
             </div>
 
             {/* Lower Header: Navigation Section - More Air, Refined items */}
-            <nav className="border-t border-white/15 hidden md:block">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-12">
+            <nav className="bg-white border-t border-surface-100 hidden md:block relative z-10">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-10">
                     <ul className="flex items-center gap-8 h-full">
                         {['Events'].map((item) => (
                             <li key={item} className="h-full">
-                                <Link href={`/${item.toLowerCase()}`} className="relative h-full flex items-center text-[13px] font-bold text-white/80 hover:text-white transition-all group">
+                                <Link href={`/${item.toLowerCase()}`} className="relative h-full flex items-center text-[13px] font-bold text-[#333333] hover:text-primary transition-all group">
                                     {item}
-                                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full" />
+                                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
                                 </Link>
                             </li>
                         ))}

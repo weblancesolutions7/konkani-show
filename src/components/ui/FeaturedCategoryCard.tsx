@@ -11,7 +11,7 @@ const FeaturedCategoryCard: React.FC<FeaturedCategoryCardProps> = ({ item, onCli
     return (
         <button
             onClick={onClick}
-            className="group block relative aspect-square md:aspect-[4/5] overflow-hidden  shadow-card hover:shadow-premium transition-all duration-300 text-left w-full"
+            className="group block relative aspect-square rounded-2xl overflow-hidden shadow-card hover:shadow-premium transition-all duration-300 text-left w-full"
         >
             <Image
                 src={item.featuredImage || 'https://via.placeholder.com/400x500'}
@@ -31,7 +31,7 @@ const FeaturedCategoryCard: React.FC<FeaturedCategoryCardProps> = ({ item, onCli
             </div>
 
             {/* Decorative Border */}
-            <div className="absolute inset-4 border border-white/20  pointer-events-none" />
+            <div className="absolute inset-4 border border-white/20 rounded-lg pointer-events-none" />
         </button>
     );
 };
