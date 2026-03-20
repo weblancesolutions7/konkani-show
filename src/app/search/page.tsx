@@ -10,6 +10,8 @@ import { useUserLocation } from '@/hooks/useUserLocation';
 import EventSearchCard from '@/components/ui/EventSearchCard';
 import FilterSidebar from '@/components/event/FilterSidebar';
 import CategoryPills from '@/components/event/CategoryPills';
+import { Search } from 'lucide-react';
+import Pagination from '@/components/ui/Pagination';
 
 function SearchResults() {
     const searchParams = useSearchParams();
@@ -25,7 +27,8 @@ function SearchResults() {
         tags: [] as string[],
         priceRange: [0, 0] as [number, number],
     });
-
+    const [page, setPage] = useState(1);
+    const limit = 12;
     // Derive top category for the pill bar
     const topCategory = filters.categories.length === 1 ? filters.categories[0] : (filters.categories.length === 0 ? 'all' : '');
 
@@ -38,7 +41,7 @@ function SearchResults() {
         }
     };
 
-    const { events, loading } = useEvents(
+    const { events, pagination, loading } = useEvents(
         filters.categories.join(','),
         'APPROVED',
         undefined,
@@ -51,7 +54,9 @@ function SearchResults() {
         filters.priceRange[0] || undefined,
         filters.priceRange[1] || undefined,
         filters.date,
-        filters.tags
+        filters.tags,
+        page,
+        limit
     );
 
     const availableCategories = preferences?.categories?.map(c => ({ id: c.name, name: c.name })) || [];
@@ -87,7 +92,7 @@ function SearchResults() {
                                 {urlQuery ? `Search for "${urlQuery}"` : 'Search Results'}
                             </h1>
                             <p className="text-surface-800/60 font-medium text-lg mb-6">
-                                {events.length} {events.length === 1 ? 'event' : 'events'} found.
+                                {pagination.total} {pagination.total === 1 ? 'event' : 'events'} found.
                             </p>
                             <CategoryPills 
                                 categories={allCategories}
@@ -104,14 +109,29 @@ function SearchResults() {
                                     ))}
                                 </div>
                             ) : events.length > 0 ? (
-                                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
-                                    {events.map(event => (
-                                        <EventSearchCard key={event.id} event={event} />
-                                    ))}
-                                </div>
+                                <>
+                                    <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+                                        {events.map(event => (
+                                            <EventSearchCard key={event.id} event={event} />
+                                        ))}
+                                    </div>
+                                    
+                                    <Pagination 
+                                        currentPage={pagination.currentPage}
+                                        totalPages={pagination.totalPages}
+                                        totalItems={pagination.total}
+                                        itemsPerPage={pagination.limit}
+                                        onPageChange={(p) => {
+                                            setPage(p);
+                                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                                        }}
+                                    />
+                                </>
                             ) : (
                                 <div className="text-center py-24 bg-white  border-2 border-dashed border-surface-200 shadow-sm">
-                                    <div className="text-6xl mb-4">🔍</div>
+                                <div className="mb-4">
+                                    <Search size={64} className="text-surface-300 mx-auto" strokeWidth={1.5} />
+                                </div>
                                     <h3 className="text-2xl font-bold text-surface-900 mb-2">No results found</h3>
                                     <p className="text-surface-600 px-6">We couldn't find any events matching your criteria.</p>
                                     <button 

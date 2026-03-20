@@ -21,11 +21,18 @@ export interface FeaturedCategory {
   uiProps?: Record<string, any>;
 }
 
+export interface HeroBannerData {
+  id: string;
+  imageUrl: string;
+  link?: string;
+}
+
 export interface Preferences {
   tags: Tag[];
   categories: Category[];
   languages: string[];
   featuredCategories: FeaturedCategory[];
+  heroBanners: HeroBannerData[];
 }
 
 export type EventStatus = 'PENDING' | 'APPROVED' | 'DELETED' | 'REJECTED';
@@ -60,6 +67,8 @@ export interface Event {
   entry?: string;
   meetingLink?: string;
   status: EventStatus;
+  isFeatured: boolean;
+  startAt?: number;
   createdAt: string;
 }
 

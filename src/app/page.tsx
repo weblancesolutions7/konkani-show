@@ -81,7 +81,7 @@ export default function HomePage() {
     <main className="min-h-screen bg-surface-50 pb-20">
       {/* Full Width Hero Carousel */}
       <section className="mb-12">
-        <HeroBanner items={featuredItems} />
+        <HeroBanner items={preferences?.heroBanners || []} />
       </section>
 
       {/* Wrapper to match container constraints for other sections */}

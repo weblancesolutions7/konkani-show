@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePreferences } from '@/hooks/usePreferences';
+import { LayoutGrid, FolderOpen } from 'lucide-react';
 
 export default function CategoriesPage() {
     const { preferences, loading } = usePreferences();
@@ -31,7 +32,9 @@ export default function CategoriesPage() {
                                 href={`/category/${encodeURIComponent(cat.name)}`}
                                 className="group relative aspect-square  bg-white border border-surface-200 p-8 flex flex-col items-center justify-center text-center transition-all hover:shadow-premium hover:border-primary/30"
                             >
-                                <span className="text-4xl mb-4 transform transition-transform group-hover:scale-110">🎭</span>
+                                <div className="text-primary mb-4 transform transition-transform group-hover:scale-110">
+                                    <LayoutGrid size={40} strokeWidth={2.5} />
+                                </div>
                                 <h3 className="text-xl font-bold text-surface-900 mb-1 group-hover:text-primary transition-colors">{cat.name}</h3>
                                 <p className="text-sm font-bold text-surface-400 uppercase tracking-tighter">
                                     {cat.count || 0} Events
@@ -41,7 +44,9 @@ export default function CategoriesPage() {
                     </div>
                 ) : (
                     <div className="text-center py-24 bg-white  border-2 border-dashed border-surface-200 shadow-sm">
-                        <div className="text-6xl mb-4">📂</div>
+                        <div className="text-surface-300 mb-4">
+                            <FolderOpen size={64} strokeWidth={1.5} />
+                        </div>
                         <h3 className="text-2xl font-bold text-surface-900 mb-2">No categories found</h3>
                         <p className="text-surface-600">Please check back later.</p>
                     </div>

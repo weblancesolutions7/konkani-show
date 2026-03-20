@@ -25,10 +25,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         }
 
         return NextResponse.json({ ...event });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error fetching event:', error);
         return NextResponse.json(
-            { error: 'Failed to fetch event' },
+            { error: 'Failed to fetch event', details: error.message },
             { status: 500 }
         );
     }
@@ -65,10 +65,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         const updatedEvent = await EventModel.update({ id }, body) as any;
 
         return NextResponse.json({ ...updatedEvent });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error updating event:', error);
         return NextResponse.json(
-            { error: 'Failed to update event' },
+            { error: 'Failed to update event', details: error.message },
             { status: 500 }
         );
     }
@@ -82,10 +82,10 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
         await EventModel.delete(id);
 
         return NextResponse.json({ message: 'Event deleted successfully' });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error deleting event:', error);
         return NextResponse.json(
-            { error: 'Failed to delete event' },
+            { error: 'Failed to delete event', details: error.message },
             { status: 500 }
         );
     }

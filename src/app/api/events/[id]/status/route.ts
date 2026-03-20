@@ -11,12 +11,20 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         const { id } = await params;
         const body = await request.json();
 
-        const validStatuses = ['PENDING', 'APPROVED', 'REJECTED', 'DELETED'];
-        if (!body.status || !validStatuses.includes(body.status)) {
-            return NextResponse.json(
-                { error: 'Invalid status. Must be one of: ' + validStatuses.join(', ') },
-                { status: 400 }
-            );
+        const updateData: any = {};
+        if (body.status) {
+            const validStatuses = ['PENDING', 'APPROVED', 'REJECTED', 'DELETED'];
+            if (validStatuses.includes(body.status)) {
+                updateData.status = body.status;
+            }
+        }
+        
+        if (typeof body.isFeatured === 'boolean') {
+            updateData.isFeatured = body.isFeatured;
+        }
+
+        if (Object.keys(updateData).length === 0) {
+            return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
         }
 
         const event = await EventModel.get(id);
@@ -27,7 +35,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
         const updatedEvent = await EventModel.update(
             { id },
-            { status: body.status }
+            updateData
         ) as any;
 
         return NextResponse.json({ ...updatedEvent });

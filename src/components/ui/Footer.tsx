@@ -1,6 +1,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { Heart } from 'lucide-react';
 
 const Footer = () => {
     return (
@@ -18,7 +19,7 @@ const Footer = () => {
 
                 <div className="border-t border-white/20 pt-8 flex flex-col md:flex-row justify-center items-center gap-6">
                     <p className="text-xs text-white/60 italic">
-                        Developed with ❤️ for the Konkani Community by WebLance Solutions.
+                        Developed with <Heart size={12} className="inline-block fill-white/60 text-white/60 mx-1 mb-0.5" /> for the Konkani Community by WebLance Solutions.
                     </p>
                     <p className="text-xs text-white/60">
                         © 2026 Konkani Show Platform. All rights reserved.

@@ -3,10 +3,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { FeaturedCategory } from '@/types';
+import { HeroBannerData } from '@/types';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface HeroBannerProps {
-    items: FeaturedCategory[];
+    items: HeroBannerData[];
 }
 
 const HeroBanner: React.FC<HeroBannerProps> = ({ items }) => {
@@ -35,21 +36,29 @@ const HeroBanner: React.FC<HeroBannerProps> = ({ items }) => {
                 className="flex transition-transform duration-700 ease-in-out h-full"
                 style={{ transform: `translateX(-${currentIndex * 100}%)` }}
             >
-                {items.map((item, index) => (
-                    <Link
-                        key={index}
-                        href={item.link || `/category/${item.category.toLowerCase()}`}
-                        className="relative w-full h-full flex-shrink-0"
-                    >
-                        <Image
-                            src={item.featuredImage || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop'}
-                            alt={item.category}
-                            fill
-                            priority={index === 0}
-                            className="object-cover"
-                        />
-                    </Link>
-                ))}
+                {items.map((item, index) => {
+                    const content = (
+                        <div className="relative w-full h-full flex-shrink-0">
+                            <Image
+                                src={item.imageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop'}
+                                alt="Hero Banner"
+                                fill
+                                priority={index === 0}
+                                className="object-cover"
+                            />
+                        </div>
+                    );
+
+                    return item.link ? (
+                        <Link key={item.id || index} href={item.link} className="relative w-full h-full flex-shrink-0">
+                            {content}
+                        </Link>
+                    ) : (
+                        <div key={item.id || index} className="relative w-full h-full flex-shrink-0">
+                            {content}
+                        </div>
+                    );
+                })}
             </div>
 
             {/* Navigation Buttons */}
@@ -60,18 +69,14 @@ const HeroBanner: React.FC<HeroBannerProps> = ({ items }) => {
                         className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center  bg-white/20 backdrop-blur-md border border-white/30 text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-white/40 active:scale-90"
                         aria-label="Previous slide"
                     >
-                        <svg xmlns="http://www.w3.org/2003/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                        </svg>
+                        <ChevronLeft size={32} strokeWidth={2.5} />
                     </button>
                     <button
                         onClick={nextSlide}
                         className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center  bg-white/20 backdrop-blur-md border border-white/30 text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-white/40 active:scale-90"
                         aria-label="Next slide"
                     >
-                        <svg xmlns="http://www.w3.org/2003/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                        </svg>
+                        <ChevronRight size={32} strokeWidth={2.5} />
                     </button>
                 </>
             )}

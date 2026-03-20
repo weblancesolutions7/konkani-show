@@ -5,6 +5,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUserLocation } from '@/hooks/useUserLocation';
+import { Search, MapPin, ChevronDown, Check } from 'lucide-react';
 
 const Header = () => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -176,9 +177,7 @@ const Header = () => {
                             className="w-full pl-12 pr-4 py-2.5 bg-white/10 backdrop-blur-xl border border-white/20  focus:outline-none focus:ring-2 focus:ring-white/40 text-sm text-white placeholder:text-white/50 transition-all duration-300 focus:bg-white/20 group-hover:border-white/40 shadow-inner"
                         />
                         <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60 group-focus-within:text-white group-hover:scale-110 transition-transform">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
+                            <Search size={18} strokeWidth={2.5} />
                         </div>
                     </form>
 
@@ -201,19 +200,14 @@ const Header = () => {
                                     </span>
                                 </div>
                                 <div className="sm:hidden flex flex-col items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
+                                    <MapPin size={18} strokeWidth={2} className="text-white/80" />
                                     <span className="text-[8px] font-black uppercase tracking-tighter opacity-70">
                                         {selectedCities.length === 0 ? 'All' :
                                             selectedCities.length === 1 ? selectedCities[0] :
                                                 `${selectedCities.length}`}
                                     </span>
                                 </div>
-                                <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 text-white/40 group-hover:text-white transition-all transform ${isCityDropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                </svg>
+                                <ChevronDown size={14} strokeWidth={2.5} className={`text-white/40 group-hover:text-white transition-all transform ${isCityDropdownOpen ? 'rotate-180' : ''}`} />
                             </div>
 
                             {/* City Dropdown */}
@@ -242,9 +236,9 @@ const Header = () => {
                                                 className="w-full pl-8 pr-8 py-2 bg-surface-50 border border-surface-100  focus:outline-none focus:border-primary/30 text-xs font-bold placeholder:text-surface-400 transition-all text-surface-900"
                                                 autoFocus
                                             />
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-400 group-focus-within:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                            </svg>
+                                            <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-surface-400 group-focus-within:text-primary transition-colors">
+                                                <Search size={14} strokeWidth={3} />
+                                            </div>
                                             {isSearchingCity && (
                                                 <div className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 border-2 border-primary border-t-transparent  animate-spin"></div>
                                             )}
@@ -284,10 +278,9 @@ const Header = () => {
                                                     }}
                                                     className="w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-primary/5 transition-colors border-b border-surface-50 group"
                                                 >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    </svg>
+                                                <div className="text-primary">
+                                                    <MapPin size={16} strokeWidth={2.5} />
+                                                </div>
                                                     <div>
                                                         <p className="text-xs font-black text-primary uppercase tracking-widest">Current Location</p>
                                                         <p className="text-sm font-bold text-surface-900 group-hover:text-primary transition-colors">{location?.city || 'Detecting...'}</p>
@@ -300,9 +293,7 @@ const Header = () => {
                                                 >
                                                     Worldwide (All Cities)
                                                     {selectedCities.length === 0 && (
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-primary" viewBox="0 0 20 20" fill="currentColor">
-                                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                                        </svg>
+                                                        <Check size={16} strokeWidth={3} className="text-primary" />
                                                     )}
                                                 </button>
 
@@ -344,9 +335,7 @@ const Header = () => {
 
                         {/* Mobile Search Toggle */}
                         <button className="md:hidden p-2 text-white/80 hover:text-white hover:bg-white/10  transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
+                                <Search size={22} strokeWidth={2.5} />
                         </button>
                     </div>
                 </div>

@@ -33,6 +33,7 @@ export interface IEvent extends Item {
     language?: string;
     meetingLink?: string;
     status: 'PENDING' | 'APPROVED' | 'DELETED' | 'REJECTED';
+    isFeatured: boolean;
     views: number;
     createdAt?: number;
     updatedAt?: number;
@@ -104,6 +105,7 @@ const EventSchema = new dynamoose.Schema(
             enum: ['PENDING', 'APPROVED', 'DELETED', 'REJECTED'],
             default: 'PENDING',
         },
+        isFeatured: { type: Boolean, default: false },
         views: { type: Number, default: 0 },
         createdAt: { type: Number, default: () => Date.now() },
         updatedAt: { type: Number, default: () => Date.now() },

@@ -15,6 +15,11 @@ export interface IPreferences extends Item {
         link?: string;
         highlightClass?: string;
     }[];
+    heroBanners: {
+        id: string;
+        imageUrl: string;
+        link?: string;
+    }[];
 }
 
 const TagSchema = new dynamoose.Schema({
@@ -49,6 +54,17 @@ const PreferencesSchema = new dynamoose.Schema(
         categories: { type: Array, schema: [CategorySchema] },
         languages: { type: Array, schema: [String] },
         featuredCategories: { type: Array, schema: [FeaturedCategorySchema] },
+        heroBanners: { 
+            type: Array, 
+            schema: [{
+                type: Object,
+                schema: {
+                    id: String,
+                    imageUrl: String,
+                    link: String
+                }
+            }] 
+        },
         createdAt: { type: Number, default: () => Date.now() },
         updatedAt: { type: Number, default: () => Date.now() },
     },

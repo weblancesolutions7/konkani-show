@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { Check, ChevronDown } from 'lucide-react';
 
 interface FilterSidebarProps {
   filters: {
@@ -124,9 +125,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
             >
                 <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${isCustomRangeOpen ? 'bg-primary border-primary' : 'border-surface-300 group-hover:border-primary'}`}>
                     {isCustomRangeOpen && (
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3.5} stroke="white" className="w-2.5 h-2.5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                        </svg>
+                        <Check size={10} strokeWidth={4} className="text-white" />
                     )}
                 </div>
                 <span className="text-[11px] font-bold text-surface-400 uppercase tracking-wider">Custom Range</span>
@@ -251,16 +250,11 @@ const FilterAccordion: React.FC<{
       className="w-full px-5 py-4 flex items-center justify-between group"
     >
       <div className="flex items-center gap-3">
-        <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            fill="none" 
-            viewBox="0 0 24 24" 
-            strokeWidth={2.5} 
-            stroke="currentColor" 
-            className={`w-3.5 h-3.5 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-        </svg>
+        <ChevronDown 
+            size={14} 
+            strokeWidth={3} 
+            className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} 
+        />
         <span className={`text-sm font-black transition-colors ${isOpen ? 'text-primary' : 'text-surface-700 group-hover:text-primary'}`}>
             {title}
         </span>

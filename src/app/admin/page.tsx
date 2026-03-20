@@ -2,276 +2,100 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import AdminTable from '@/components/admin/AdminTable';
 import { API_ROUTES } from '@/config/api';
 import { Event } from '@/types';
-import WorldLocationPicker, { LocationData } from '@/components/event/WorldLocationPicker';
+import { useNotification } from '@/components/ui/NotificationProvider';
+import { Loader2, Star, Clock, CheckCircle, Search } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import Pagination from '@/components/ui/Pagination';
 
-type AdminTab = 'PENDING' | 'APPROVED' | 'DELETED';
-
-// Edit Modal Component
-function EditModal({ event, onClose, onSave }: { event: Event; onClose: () => void; onSave: () => void }) {
-    const [title, setTitle] = useState(event.title);
-    const [description, setDescription] = useState(event.description);
-    const [date, setDate] = useState(event.date);
-    const [time, setTime] = useState(event.time);
-    
-    // Initialize WorldLocationData from existing Event schema
-    const [locationData, setLocationData] = useState<LocationData | null>(() => {
-        if (event.locationDetails) {
-            return {
-                ...event.locationDetails,
-                lat: event.locationCoords ? event.locationCoords.coordinates[1] : 12.9141,
-                lng: event.locationCoords ? event.locationCoords.coordinates[0] : 74.8560
-            };
-        }
-        return null;
-    });
-
-    const [category, setCategory] = useState(event.category);
-    const [entry, setEntry] = useState(event.entry || '');
-    const [meetingLink, setMeetingLink] = useState(event.meetingLink || '');
-    const [saving, setSaving] = useState(false);
-
-    const handleSave = async () => {
-        setSaving(true);
-        try {
-            // Create fallback display string
-            const displayParts = [];
-            if (locationData?.venueAddress) displayParts.push(locationData.venueAddress);
-            if (locationData?.city) displayParts.push(locationData.city);
-            if (locationData?.state) displayParts.push(locationData.state);
-            if (locationData?.country) displayParts.push(locationData.country);
-            const locationString = displayParts.join(', ') || event.location;
-
-            const response = await fetch(API_ROUTES.EVENT_BY_ID(event.id), {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    title,
-                    description,
-                    date,
-                    time,
-                    location: locationString,
-                    locationDetails: locationData,
-                    locationCoords: locationData ? {
-                        type: 'Point',
-                        coordinates: [locationData.lng, locationData.lat]
-                    } : undefined,
-                    category,
-                    entry,
-                    meetingLink,
-                }),
-            });
-            if (!response.ok) throw new Error('Failed to update');
-            onSave();
-            onClose();
-        } catch (error) {
-            console.error('Update failed:', error);
-            alert('Failed to update event.');
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    return (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
-            <div className="bg-white  shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8" onClick={(e) => e.stopPropagation()}>
-                <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-2xl font-black">Edit Event</h2>
-                    <button onClick={onClose} className="w-10 h-10  bg-surface-100 flex items-center justify-center hover:bg-surface-200 transition-colors font-bold">✕</button>
-                </div>
-
-                <div className="space-y-6">
-                    <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-widest text-surface-800/40">Title</label>
-                        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full p-4 bg-surface-50  border-2 border-transparent focus:border-primary outline-none font-bold" />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-widest text-surface-800/40">Description</label>
-                        <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} className="w-full p-4 bg-surface-50  border-2 border-transparent focus:border-primary outline-none font-medium resize-none" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <label className="text-xs font-black uppercase tracking-widest text-surface-800/40">Date</label>
-                            <input type="text" value={date} onChange={(e) => setDate(e.target.value)} className="w-full p-4 bg-surface-50  border-2 border-transparent focus:border-primary outline-none font-bold" />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-xs font-black uppercase tracking-widest text-surface-800/40">Time</label>
-                            <input type="text" value={time} onChange={(e) => setTime(e.target.value)} className="w-full p-4 bg-surface-50  border-2 border-transparent focus:border-primary outline-none font-bold" />
-                        </div>
-                    </div>
-                    <div className="space-y-4">
-                        <label className="text-xs font-black uppercase tracking-widest text-surface-800/40">Event Location Details</label>
-                        <WorldLocationPicker 
-                            value={locationData || undefined}
-                            onChange={(data) => setLocationData(data)}
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-widest text-surface-800/40">Category</label>
-                        <input type="text" value={category} onChange={(e) => setCategory(e.target.value)} className="w-full p-4 bg-surface-50  border-2 border-transparent focus:border-primary outline-none font-bold" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <label className="text-xs font-black uppercase tracking-widest text-surface-800/40">Entry Fee</label>
-                            <input type="text" value={entry} onChange={(e) => setEntry(e.target.value)} className="w-full p-4 bg-surface-50  border-2 border-transparent focus:border-primary outline-none font-bold" />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-xs font-black uppercase tracking-widest text-surface-800/40">Meeting Link</label>
-                            <input type="text" value={meetingLink} onChange={(e) => setMeetingLink(e.target.value)} className="w-full p-4 bg-surface-50  border-2 border-transparent focus:border-primary outline-none" />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flex gap-4 mt-8">
-                    <button
-                        onClick={handleSave}
-                        disabled={saving}
-                        className="flex-1 py-4 bg-primary text-white font-black  shadow-lg hover:bg-primary-dark transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                    >
-                        {saving ? (
-                            <><div className="w-4 h-4 border-2 border-white border-t-transparent  animate-spin" /> Saving...</>
-                        ) : (
-                            'Save Changes'
-                        )}
-                    </button>
-                    <button onClick={onClose} className="px-8 py-4 bg-surface-100 text-surface-800 font-bold  hover:bg-surface-200 transition-colors">
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-// Preview Modal Component
-function PreviewModal({ 
-    event, 
-    onClose, 
-    onApprove, 
-    onReject, 
-    onEdit 
-}: { 
-    event: Event; 
-    onClose: () => void; 
-    onApprove?: () => void;
-    onReject?: () => void;
-    onEdit: () => void;
-}) {
-    return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto" onClick={onClose}>
-            <div className="bg-white shadow-2xl max-w-4xl w-full my-8 min-h-[50vh] flex flex-col md:flex-row overflow-hidden border border-surface-200" onClick={(e) => e.stopPropagation()}>
-                {/* Left: Visual Content */}
-                <div className="md:w-1/2 bg-surface-100 relative min-h-[300px]">
-                    <img 
-                        src={event.detailImage || event.featureImage} 
-                        alt={event.title} 
-                        className="w-full h-full object-cover" 
-                    />
-                    <div className="absolute top-4 left-4 flex gap-2">
-                        <span className="px-3 py-1 bg-primary text-white text-[10px] font-black uppercase tracking-widest">{event.category}</span>
-                        {event.status === 'PENDING' && (
-                            <span className="px-3 py-1 bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest">Pending Review</span>
-                        )}
-                    </div>
-                </div>
-
-                {/* Right: Details & Actions */}
-                <div className="md:w-1/2 p-8 flex flex-col">
-                    <div className="flex justify-between items-start mb-6">
-                        <div>
-                            <h2 className="text-3xl font-black leading-tight mb-2">{event.title}</h2>
-                            <p className="text-primary font-bold">{event.date} • {event.time}</p>
-                            <p className="text-surface-800/60 font-medium text-sm">{event.location}</p>
-                        </div>
-                        <button onClick={onClose} className="w-8 h-8 flex items-center justify-center hover:bg-surface-100 transition-colors font-bold text-lg">✕</button>
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto pr-2 mb-8 max-h-[400px]">
-                        <div className="space-y-6">
-                            <section>
-                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-surface-400 mb-2">About Event</h3>
-                                <p className="text-surface-800 text-sm leading-relaxed whitespace-pre-wrap">{event.description}</p>
-                            </section>
-
-                            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-surface-100">
-                                <div>
-                                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-surface-400 mb-1">Entry Fee</h3>
-                                    <p className="font-bold text-primary">{event.entry || 'Free Entry'}</p>
-                                </div>
-                                {event.meetingLink && (
-                                    <div>
-                                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-surface-400 mb-1">Meeting Link</h3>
-                                        <a href={event.meetingLink} target="_blank" className="text-xs font-bold text-blue-600 truncate block hover:underline">{event.meetingLink}</a>
-                                    </div>
-                                )}
-                            </div>
-
-                            {event.tags && event.tags.length > 0 && (
-                                <div className="pt-4 border-t border-surface-100">
-                                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-surface-400 mb-2">Tags</h3>
-                                    <div className="flex flex-wrap gap-2">
-                                        {event.tags.map(tag => (
-                                            <span key={tag} className="px-2 py-1 bg-surface-100 text-[10px] font-bold text-surface-600 uppercase">#{tag}</span>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Footer Actions */}
-                    <div className="pt-6 border-t border-surface-100 flex flex-wrap gap-3">
-                        {onApprove && event.status === 'PENDING' && (
-                            <button 
-                                onClick={onApprove}
-                                className="flex-1 px-6 py-3 bg-emerald-600 text-white font-black text-xs uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20"
-                            >
-                                Approve Event
-                            </button>
-                        )}
-                        {onReject && event.status === 'PENDING' && (
-                            <button 
-                                onClick={onReject}
-                                className="flex-1 px-6 py-3 bg-rose-600 text-white font-black text-xs uppercase tracking-widest hover:bg-rose-700 transition-all shadow-lg shadow-rose-600/20"
-                            >
-                                Reject
-                            </button>
-                        )}
-                        <button 
-                            onClick={onEdit}
-                            className="px-6 py-3 bg-surface-100 text-surface-800 font-black text-xs uppercase tracking-widest hover:bg-surface-200 transition-all"
-                        >
-                            Edit
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-import AdminSidebar from '@/components/admin/AdminSidebar';
+type AdminView = 'featured' | 'timeline' | 'approval';
+type ApprovalStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+type TimelineStatus = 'UPCOMING' | 'ONGOING' | 'COMPLETED';
 
 export default function AdminDashboard() {
-    const [activeTab, setActiveTab] = useState<AdminTab>('PENDING');
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const currentView = (searchParams.get('view') as AdminView) || 'approval';
+
+    const { showAlert, showConfirm } = useNotification();
+    const [activeStatus, setActiveStatus] = useState<ApprovalStatus>('PENDING');
+    const [activeTimelineTab, setActiveTimelineTab] = useState<TimelineStatus>('UPCOMING');
     const [events, setEvents] = useState<Event[]>([]);
     const [loading, setLoading] = useState(true);
-    const [previewEvent, setPreviewEvent] = useState<Event | null>(null);
-    const [editingEvent, setEditingEvent] = useState<Event | null>(null);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
+    const [page, setPage] = useState(1);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [pagination, setPagination] = useState({ total: 0, totalPages: 1, limit: 10 });
+    const limit = 10;
 
-    const fetchEvents = async (status?: string) => {
+    const parseEventDate = (ev: Event): number => {
+        if (ev.startAt && ev.startAt > 0) return ev.startAt;
+
+        // Robust parsing for DD-MM-YYYY or YYYY-MM-DD
+        const dateStr = ev.date;
+        const timeStr = ev.time || '00:00';
+
+        // Try direct parsing first
+        let d = new Date(`${dateStr} ${timeStr}`);
+        if (!isNaN(d.getTime())) return d.getTime();
+
+        // Fallback for DD-MM-YYYY
+        const parts = dateStr.split('-');
+        if (parts.length === 3) {
+            const [p1, p2, p3] = parts.map(Number);
+            const [hours, mins] = timeStr.split(':').map(Number);
+
+            // Assume if p1 > 31, it's YYYY-MM-DD
+            if (p1 > 31) {
+                d = new Date(p1, p2 - 1, p3, hours || 0, mins || 0);
+            } else {
+                // Otherwise DD-MM-YYYY
+                d = new Date(p3, p2 - 1, p1, hours || 0, mins || 0);
+            }
+            return d.getTime();
+        }
+
+        return 0;
+    };
+
+    const fetchEvents = async () => {
         setLoading(true);
         try {
             const params = new URLSearchParams();
-            if (status) params.set('status', status);
+            if (currentView === 'approval') {
+                params.set('status', activeStatus);
+            } else if (currentView === 'featured') {
+                params.set('featured', 'true');
+                params.set('sort', 'featured');
+            } else if (currentView === 'timeline') {
+                params.set('timeline', activeTimelineTab.toLowerCase());
+            }
+
+            if (searchQuery.trim()) {
+                params.set('q', searchQuery.trim());
+            }
+
+            params.set('page', page.toString());
+            params.set('limit', limit.toString());
+
             const response = await fetch(`${API_ROUTES.EVENTS}?${params.toString()}`);
             if (!response.ok) throw new Error('Failed to fetch');
-            const data = await response.json();
-            setEvents(data);
+            const result = await response.json();
+
+            if (Array.isArray(result)) {
+                setEvents(result);
+                setPagination({ total: result.length, totalPages: 1, limit: result.length });
+            } else {
+                setEvents(result.data || []);
+                setPagination({
+                    total: result.pagination?.total || 0,
+                    totalPages: result.pagination?.totalPages || 1,
+                    limit: result.pagination?.limit || limit
+                });
+            }
         } catch (error) {
             console.error('Fetch failed:', error);
             setEvents([]);
@@ -281,8 +105,15 @@ export default function AdminDashboard() {
     };
 
     useEffect(() => {
-        fetchEvents(activeTab);
-    }, [activeTab]);
+        setPage(1); // Reset page when view or tab changes
+    }, [currentView, activeStatus, activeTimelineTab]);
+
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            fetchEvents();
+        }, 500); // 500ms debounce
+        return () => clearTimeout(timeoutId);
+    }, [currentView, activeStatus, activeTimelineTab, page, searchQuery]);
 
     const handleApprove = async (id: string) => {
         setActionLoading(id);
@@ -292,11 +123,15 @@ export default function AdminDashboard() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: 'APPROVED' }),
             });
-            if (!response.ok) throw new Error('Failed to approve');
-            fetchEvents(activeTab);
-        } catch (error) {
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.details || errorData.error || 'Failed to approve');
+            }
+            fetchEvents();
+            showAlert('Event approved successfully!', 'Success');
+        } catch (error: any) {
             console.error('Approve failed:', error);
-            alert('Failed to approve event.');
+            showAlert(`Failed to approve: ${error.message}`, 'Error');
         } finally {
             setActionLoading(null);
         }
@@ -310,117 +145,153 @@ export default function AdminDashboard() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: 'REJECTED' }),
             });
-            if (!response.ok) throw new Error('Failed to reject');
-            fetchEvents(activeTab);
-        } catch (error) {
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.details || errorData.error || 'Failed to reject');
+            }
+            fetchEvents();
+            showAlert('Event rejected.', 'Success');
+        } catch (error: any) {
             console.error('Reject failed:', error);
-            alert('Failed to reject event.');
+            showAlert(`Failed to reject: ${error.message}`, 'Error');
         } finally {
             setActionLoading(null);
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this event?')) return;
+    // Delete functionality removed as per user request
+
+    const handleToggleFeatured = async (id: string, isFeatured: boolean) => {
         setActionLoading(id);
         try {
             const response = await fetch(API_ROUTES.EVENT_BY_ID(id), {
-                method: 'DELETE',
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isFeatured }),
             });
-            if (!response.ok) throw new Error('Failed to delete');
-            fetchEvents(activeTab);
-        } catch (error) {
-            console.error('Delete failed:', error);
-            alert('Failed to delete event.');
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.details || errorData.error || 'Failed to update featured status');
+            }
+            fetchEvents();
+            showAlert(isFeatured ? 'Event marked as featured!' : 'Event removed from featured.', 'Success');
+        } catch (error: any) {
+            console.error('Feature toggle failed:', error);
+            showAlert(`Failed to update featured: ${error.message}`, 'Error');
         } finally {
             setActionLoading(null);
         }
     };
 
     const handleEdit = (id: string) => {
-        const event = events.find(e => e.id === id);
-        if (event) {
-            setEditingEvent(event);
-            setPreviewEvent(null);
-        }
+        router.push(`/admin/events/${id}/edit`);
     };
 
     const handlePreview = (id: string) => {
-        const event = events.find(e => e.id === id);
-        if (event) setPreviewEvent(event);
+        router.push(`/admin/events/${id}`);
     };
 
     return (
-        <div className="flex min-h-screen bg-surface-100">
-            <AdminSidebar />
-            
-            <main className="flex-1 py-12 px-10">
-                <div className="max-w-6xl mx-auto">
-                    <header className="mb-10">
-                        <h1 className="text-3xl font-black text-foreground">Events Dashboard</h1>
-                        <p className="text-surface-800/60 font-medium">Approve, edit, or remove community events and shows.</p>
-                    </header>
+        <div className="py-12 px-10">
+            <div className="max-w-6xl mx-auto">
+                <header className="mb-10 flex items-center justify-between">
+                    <div>
+                        <h1 className="text-3xl font-black text-foreground capitalize">
+                            {currentView === 'approval' ? 'Event Approvals' : currentView === 'featured' ? 'Featured Events' : 'Event Timeline'}
+                        </h1>
+                        <p className="text-surface-800/60 font-medium">
+                            {currentView === 'approval'
+                                ? 'Manage event submissions and their status.'
+                                : currentView === 'featured'
+                                    ? 'Curated events highlighted on the main page.'
+                                    : 'Overview of upcoming, ongoing, and completed events sorted by date.'}
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        {currentView === 'featured' && <Star className="text-amber-500" size={32} fill="currentColor" />}
+                        {currentView === 'timeline' && <Clock className="text-primary" size={32} />}
+                        {currentView === 'approval' && <CheckCircle className="text-emerald-500" size={32} />}
+                    </div>
+                </header>
 
-                    <section className="bg-surface-50  p-8 shadow-premium border border-surface-200">
-                        <div className="flex border-b border-surface-100 mb-8 overflow-x-auto">
-                            {(['PENDING', 'APPROVED', 'DELETED'] as AdminTab[]).map(tab => (
-                                <button
-                                    key={tab}
-                                    onClick={() => setActiveTab(tab)}
-                                    className={`px-8 py-4 font-black transition-all border-b-4 ${activeTab === tab
-                                        ? 'border-primary text-primary'
-                                        : 'border-transparent text-surface-800/40 hover:text-surface-800'
-                                        }`}
-                                >
-                                    {tab}
-                                </button>
-                            ))}
-                        </div>
-
-                        {loading ? (
-                            <div className="space-y-4">
-                                {Array.from({ length: 5 }).map((_, i) => (
-                                    <div key={i} className="h-16 w-full bg-surface-100 animate-pulse " />
+                <section className="bg-white p-8 rounded-3xl border border-surface-200 shadow-premium min-h-[600px]">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                        {currentView === 'approval' && (
+                            <div className="flex bg-surface-100 p-1.5 rounded-2xl border border-surface-200 w-fit">
+                                {(['PENDING', 'APPROVED', 'REJECTED'] as ApprovalStatus[]).map(status => (
+                                    <button
+                                        key={status}
+                                        onClick={() => setActiveStatus(status)}
+                                        className={`px-8 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${activeStatus === status
+                                            ? 'bg-white text-primary shadow-sm'
+                                            : 'text-surface-400 hover:text-surface-600'
+                                            }`}
+                                    >
+                                        {status}
+                                    </button>
                                 ))}
                             </div>
-                        ) : (
-                            <AdminTable
-                                events={events}
-                                onApprove={handleApprove}
-                                onReject={handleReject}
-                                onDelete={handleDelete}
-                                onEdit={handleEdit}
-                                onPreview={handlePreview}
-                            />
-                        )}
-                        {/* Preview Modal */}
-                        {previewEvent && (
-                            <PreviewModal
-                                event={previewEvent}
-                                onClose={() => setPreviewEvent(null)}
-                                onApprove={() => {
-                                    handleApprove(previewEvent.id);
-                                    setPreviewEvent(null);
-                                }}
-                                onReject={() => {
-                                    handleReject(previewEvent.id);
-                                    setPreviewEvent(null);
-                                }}
-                                onEdit={() => handleEdit(previewEvent.id)}
-                            />
                         )}
 
-                        {/* Edit Modal */}
-                        {editingEvent && (
-                            <EditModal
-                                event={editingEvent}
-                                onClose={() => setEditingEvent(null)}
-                                onSave={() => fetchEvents(activeTab)}
-                            />
+                        {currentView === 'timeline' && (
+                            <div className="flex bg-surface-100 p-1.5 rounded-2xl border border-surface-200 w-fit">
+                                {(['UPCOMING', 'ONGOING', 'COMPLETED'] as TimelineStatus[]).map(tab => (
+                                    <button
+                                        key={tab}
+                                        onClick={() => setActiveTimelineTab(tab)}
+                                        className={`px-8 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${activeTimelineTab === tab
+                                            ? 'bg-white text-primary shadow-sm'
+                                            : 'text-surface-400 hover:text-surface-600'
+                                            }`}
+                                    >
+                                        {tab}
+                                    </button>
+                                ))}
+                            </div>
                         )}
-                    </section>
-                </div>
-            </main>
+
+                        <div className="relative group max-w-sm w-full">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-surface-400 group-focus-within:text-primary transition-colors" size={20} />
+                            <input
+                                type="text"
+                                placeholder="Search events..."
+                                value={searchQuery}
+                                onChange={(e) => {
+                                    setSearchQuery(e.target.value);
+                                    setPage(1); // Reset to first page on search
+                                }}
+                                className="w-full pl-12 pr-4 py-3 bg-surface-50 border border-surface-200 rounded-2xl text-sm font-medium focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all placeholder:text-surface-400"
+                            />
+                        </div>
+                    </div>
+
+                    {loading ? (
+                        <div className="space-y-4">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                                <div key={i} className="h-16 w-full bg-surface-100 animate-pulse " />
+                            ))}
+                        </div>
+                    ) : (
+                        <AdminTable
+                            events={events}
+                            onApprove={handleApprove}
+                            onReject={handleReject}
+                            onEdit={handleEdit}
+                            onPreview={handlePreview}
+                            onToggleFeatured={handleToggleFeatured}
+                        />
+                    )}
+
+                    <Pagination
+                        currentPage={page}
+                        totalPages={pagination.totalPages}
+                        totalItems={pagination.total}
+                        itemsPerPage={pagination.limit}
+                        onPageChange={(p) => setPage(p)}
+                    />
+                    {/* Page-level views now handle review and editing */}
+                </section>
+            </div>
         </div>
     );
 }

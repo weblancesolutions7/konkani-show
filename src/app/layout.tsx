@@ -10,6 +10,7 @@ const roboto = Roboto({
 });
 
 import LayoutWrapper from "@/components/layout/LayoutWrapper";
+import { NotificationProvider } from "@/components/ui/NotificationProvider";
 
 export default function RootLayout({
   children,
@@ -19,9 +20,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={roboto.variable}>
       <body className="antialiased font-sans" data-brand="weblance-v1">
-        <LayoutWrapper>
-          {children}
-        </LayoutWrapper>
+        <NotificationProvider>
+          <LayoutWrapper>
+            {children}
+          </LayoutWrapper>
+        </NotificationProvider>
       </body>
     </html>
   );

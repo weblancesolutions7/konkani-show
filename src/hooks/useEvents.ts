@@ -18,9 +18,12 @@ export function useEvents(
     minPrice?: number,
     maxPrice?: number,
     dateFilter?: string,
-    tags?: string[]
+    tags?: string[],
+    page: number = 1,
+    limit: number = 20
 ) {
     const [events, setEvents] = useState<Event[]>([]);
+    const [pagination, setPagination] = useState({ total: 0, totalPages: 1, currentPage: 1, limit: 20 });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 
@@ -41,6 +44,8 @@ export function useEvents(
             if (maxPrice !== undefined) params.set('maxPrice', maxPrice.toString());
             if (dateFilter) params.set('dateFilter', dateFilter);
             if (tags && tags.length > 0) params.set('tags', tags.join(','));
+            params.set('page', page.toString());
+            params.set('limit', limit.toString());
 
             const url = params.toString()
                 ? `${API_ROUTES.EVENTS}?${params.toString()}`
@@ -48,8 +53,21 @@ export function useEvents(
 
             const response = await fetch(url);
             if (!response.ok) throw new Error('Failed to fetch events');
-            const data = await response.json();
-            setEvents(data);
+            const result = await response.json();
+            
+            // Handle both old array response and new paginated response structure
+            if (Array.isArray(result)) {
+                setEvents(result);
+                setPagination({ total: result.length, totalPages: 1, currentPage: 1, limit: result.length });
+            } else {
+                setEvents(result.data || []);
+                setPagination({
+                    total: result.pagination?.total || 0,
+                    totalPages: result.pagination?.totalPages || 1,
+                    currentPage: result.pagination?.page || 1,
+                    limit: result.pagination?.limit || limit
+                });
+            }
             setError(null);
         } catch (err) {
             setError(err instanceof Error ? err : new Error('Unknown error'));
@@ -57,7 +75,7 @@ export function useEvents(
         } finally {
             setLoading(false);
         }
-    }, [category, status, tag, location, q, lat, lng, sort, language, minPrice, maxPrice, dateFilter, tags]);
+    }, [category, status, tag, location, q, lat, lng, sort, language, minPrice, maxPrice, dateFilter, tags, page, limit]);
 
     useEffect(() => {
         fetchEvents();
@@ -65,5 +83,5 @@ export function useEvents(
 
     const refetch = () => fetchEvents();
 
-    return { events, loading, error, refetch };
+    return { events, pagination, loading, error, refetch };
 }

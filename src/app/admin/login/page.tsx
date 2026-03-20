@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from '@/lib/auth';
+import { AlertCircle, ShieldCheck } from 'lucide-react';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -51,8 +52,8 @@ export default function LoginPage() {
         <div className="min-h-screen flex items-center justify-center bg-surface-50 p-6">
             <div className="max-w-md w-full bg-white rounded-[2rem] shadow-premium border border-surface-200 p-10">
                 <div className="text-center mb-10">
-                    <div className="w-16 h-16 bg-primary/10 text-primary rounded-2xl flex items-center justify-center text-3xl mb-4 mx-auto font-black">
-                        MS
+                    <div className="w-16 h-16 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mb-4 mx-auto">
+                        <ShieldCheck size={32} strokeWidth={2.5} />
                     </div>
                     <h1 className="text-3xl font-black tracking-tight">Admin Portal</h1>
                     <p className="text-surface-800/60 font-medium">Secured by AWS Cognito</p>
@@ -60,8 +61,8 @@ export default function LoginPage() {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {error && (
-                        <div className="p-4 bg-rose-50 text-rose-600 text-sm font-bold rounded-xl border border-rose-100 italic">
-                            ⚠️ {error}
+                        <div className="p-4 bg-rose-50 text-rose-600 text-sm font-bold rounded-xl border border-rose-100 italic flex items-center gap-2">
+                            <AlertCircle size={16} strokeWidth={3} /> {error}
                         </div>
                     )}
 

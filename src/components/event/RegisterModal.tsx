@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { X, CheckCircle2, Loader2 } from 'lucide-react';
 import { Event } from '@/types';
 
 interface RegisterModalProps {
@@ -65,9 +66,7 @@ export default function RegisterModal({ isOpen, onClose, event }: RegisterModalP
                     onClick={onClose}
                     className="absolute top-4 right-4 text-surface-500 hover:text-surface-900 bg-surface-100 hover:bg-surface-200 p-2  transition-colors"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <X size={20} />
                 </button>
 
                 <div className="p-8">
@@ -79,9 +78,7 @@ export default function RegisterModal({ isOpen, onClose, event }: RegisterModalP
                     {status === 'success' ? (
                         <div className="text-center py-8">
                             <div className="w-16 h-16 bg-green-100 text-green-600  flex items-center justify-center mx-auto mb-4">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-8 h-8">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                </svg>
+                                <CheckCircle2 size={32} strokeWidth={2.5} />
                             </div>
                             <h3 className="text-xl font-bold text-surface-900 mb-2">Registration Complete!</h3>
                             <p className="text-surface-600 mb-6">We've received your registration for this event.</p>
@@ -160,10 +157,7 @@ export default function RegisterModal({ isOpen, onClose, event }: RegisterModalP
                             >
                                 {status === 'loading' ? (
                                     <>
-                                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
+                                        <Loader2 size={18} className="animate-spin" />
                                         Processing...
                                     </>
                                 ) : (

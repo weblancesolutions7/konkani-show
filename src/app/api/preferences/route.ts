@@ -51,6 +51,12 @@ export async function GET() {
                             'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?q=80&w=2070&auto=format&fit=crop',
                     },
                 ],
+                heroBanners: [
+                    {
+                        id: '1',
+                        imageUrl: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop',
+                    }
+                ]
             });
             await defaultPrefs.save();
             preferences = defaultPrefs;
@@ -92,7 +98,7 @@ export async function GET() {
                 ...cat,
                 count: countMap[cat.name] || 0
             }));
-            
+
             // Check if count changed to avoid unnecessary saves
             const changed = JSON.stringify(updatedCategories) !== JSON.stringify(preferences.categories);
             if (changed) {
@@ -101,15 +107,21 @@ export async function GET() {
             }
         }
 
+        // Ensure heroBanners exists
+        if (!preferences.heroBanners) {
+            preferences.heroBanners = [];
+            updated = true;
+        }
+
         if (updated) {
             await preferences.save();
         }
 
         return NextResponse.json({ ...preferences });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error fetching preferences:', error);
         return NextResponse.json(
-            { error: 'Failed to fetch preferences' },
+            { error: 'Failed to fetch preferences', details: error.message },
             { status: 500 }
         );
     }
@@ -119,10 +131,10 @@ export async function GET() {
 export async function PUT(request: NextRequest) {
     try {
         const body = await request.json();
-        
+
         // Ensure all featured items have an ID to satisfy validation
-        if (body.featuredCategories) {
-            body.featuredCategories = body.featuredCategories.map((f: any) => ({
+        if (body.heroBanners) {
+            body.heroBanners = body.heroBanners.map((f: any) => ({
                 ...f,
                 id: f.id || Math.random().toString(36).substr(2, 9)
             }));
@@ -134,10 +146,10 @@ export async function PUT(request: NextRequest) {
         ) as any;
 
         return NextResponse.json({ ...preferences });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error updating preferences:', error);
         return NextResponse.json(
-            { error: 'Failed to update preferences' },
+            { error: 'Failed to update preferences', details: error.message },
             { status: 500 }
         );
     }

@@ -7,6 +7,7 @@ import { useUserLocation } from '@/hooks/useUserLocation';
 import EventSearchCard from '@/components/ui/EventSearchCard';
 import FilterSidebar from '@/components/event/FilterSidebar';
 import CategoryPills from '@/components/event/CategoryPills';
+import { Theater } from 'lucide-react';
 
 export default function EventsPage() {
     const { preferences } = usePreferences();
@@ -97,7 +98,9 @@ export default function EventsPage() {
                                 </div>
                             ) : (
                                 <div className="text-center py-24 bg-white  border-2 border-dashed border-surface-200 shadow-sm">
-                                    <div className="text-6xl mb-4">🎭</div>
+                                <div className="mb-4">
+                                    <Theater size={64} className="text-surface-300 mx-auto" strokeWidth={1.5} />
+                                </div>
                                     <h3 className="text-2xl font-bold text-surface-900 mb-2">No events found</h3>
                                     <p className="text-surface-600 px-6">Try adjusting your filters to find what you're looking for.</p>
                                     <button 

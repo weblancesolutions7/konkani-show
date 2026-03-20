@@ -9,6 +9,8 @@ const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapCo
 const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
 const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
 import { useMap, useMapEvents } from 'react-leaflet';
+import { useNotification } from '@/components/ui/NotificationProvider';
+import { MapPin, Loader2 } from 'lucide-react';
 
 export interface LocationData {
     country: string;
@@ -45,6 +47,7 @@ function MapEvents({ onLocationSelect }: { onLocationSelect: (lat: number, lng: 
 }
 
 export default function WorldLocationPicker({ value, onChange }: WorldLocationPickerProps) {
+    const { showAlert } = useNotification();
     const [country, setCountry] = useState(value?.country || '');
     const [state, setState] = useState(value?.state || '');
     const [city, setCity] = useState(value?.city || '');
@@ -113,7 +116,7 @@ export default function WorldLocationPicker({ value, onChange }: WorldLocationPi
 
     const handleUseCurrentLocation = () => {
         if (!navigator.geolocation) {
-            alert("Geolocation is not supported by your browser.");
+            showAlert("Geolocation is not supported by your browser.", "Feature Unavailable");
             return;
         }
 
@@ -128,7 +131,7 @@ export default function WorldLocationPicker({ value, onChange }: WorldLocationPi
             },
             (error) => {
                 console.error("Geolocation Error:", error);
-                alert("Unable to retrieve your location. Check your permissions.");
+                showAlert("Unable to retrieve your location. Check your permissions.", "Geolocation Error");
                 setIsLocating(false);
             }
         );
@@ -136,7 +139,7 @@ export default function WorldLocationPicker({ value, onChange }: WorldLocationPi
 
     const handleSearch = useCallback(async (queryToSearch: string) => {
         if (!queryToSearch.trim()) return;
-        
+
         setIsSearching(true);
         // Do not clear search results immediately so the UI doesn't flicker while typing
         try {
@@ -170,17 +173,17 @@ export default function WorldLocationPicker({ value, onChange }: WorldLocationPi
     const handleSelectResult = (result: any) => {
         const newLat = parseFloat(result.lat);
         const newLng = parseFloat(result.lon);
-        
+
         setLat(newLat);
         setLng(newLng);
         setVenueAddress(result.display_name.split(',')[0]); // First part is usually the venue
-        
+
         // Populate broad details from nominatim
         setCity(result.address?.city || result.address?.town || result.address?.village || result.name || '');
         setState(result.address?.state || '');
         setCountry(result.address?.country || '');
         setZipCode(result.address?.postcode || '');
-        
+
         // Clear search
         setSearchResults([]);
         setSearchQuery('');
@@ -201,16 +204,16 @@ export default function WorldLocationPicker({ value, onChange }: WorldLocationPi
                         />
                         {isSearching && (
                             <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                                <div className="w-5 h-5 border-2 border-primary border-t-transparent  animate-spin"></div>
+                                <Loader2 size={20} className="animate-spin text-primary" />
                             </div>
                         )}
                     </div>
-                    
+
                     {/* Search Results Dropdown */}
                     {searchResults.length > 0 && (
                         <div className="absolute z-50 top-full left-0 right-0 mt-2 bg-white border border-surface-200  shadow-xl overflow-hidden max-h-[300px] overflow-y-auto">
                             {searchResults.map((result, idx) => (
-                                <div 
+                                <div
                                     key={idx}
                                     onClick={() => handleSelectResult(result)}
                                     className="p-4 hover:bg-surface-50 cursor-pointer border-b border-surface-100 last:border-0 transition-colors"
@@ -222,7 +225,7 @@ export default function WorldLocationPicker({ value, onChange }: WorldLocationPi
                         </div>
                     )}
                 </div>
-                
+
                 <button
                     type="button"
                     onClick={handleUseCurrentLocation}
@@ -231,12 +234,12 @@ export default function WorldLocationPicker({ value, onChange }: WorldLocationPi
                 >
                     {isLocating ? (
                         <>
-                            <div className="w-4 h-4 border-2 border-surface-900 border-t-transparent  animate-spin"></div>
+                            <Loader2 size={16} className="animate-spin text-surface-900" />
                             Locating...
                         </>
                     ) : (
                         <>
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <MapPin size={20} strokeWidth={2} />
                             Use Current Location
                         </>
                     )}
@@ -285,7 +288,7 @@ export default function WorldLocationPicker({ value, onChange }: WorldLocationPi
                         {lat.toFixed(4)}, {lng.toFixed(4)}
                     </span>
                 </div>
-                
+
                 {!L ? (
                     <div className="h-[250px] w-full bg-surface-50 animate-pulse  flex items-center justify-center font-bold text-surface-400">Loading Map...</div>
                 ) : (
@@ -302,9 +305,9 @@ export default function WorldLocationPicker({ value, onChange }: WorldLocationPi
                             />
                             <Marker position={[lat, lng]} />
                             <MapUpdater center={[lat, lng]} />
-                            <MapEvents onLocationSelect={(la, ln) => { 
-                                setLat(la); 
-                                setLng(ln); 
+                            <MapEvents onLocationSelect={(la, ln) => {
+                                setLat(la);
+                                setLng(ln);
                                 // Optionally reverse geocode on map click too:
                                 reverseGeocode(la, ln);
                             }} />
