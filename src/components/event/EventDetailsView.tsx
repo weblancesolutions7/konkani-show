@@ -104,14 +104,6 @@ export default function EventDetailsView({ event, isAdminView = false }: EventDe
                             })()}
                         </div>
 
-                        {/* CTA button */}
-                        {event.meetingLink && (
-                            <div className="pt-2">
-                                <a href={event.meetingLink} target="_blank" className="inline-block bg-gradient-to-r from-[#7030ef] to-[#db1fff] hover:opacity-90 text-white font-bold px-12 py-3 rounded-lg transition-all text-center min-w-[200px] shadow-lg hover:scale-[1.02] shadow-[#7030ef]/20">
-                                    Book tickets
-                                </a>
-                            </div>
-                        )}
                     </div>
                 </div>
             </div>

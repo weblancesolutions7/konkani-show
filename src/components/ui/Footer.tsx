@@ -10,68 +10,50 @@ const Footer = () => {
 
     return (
         <footer className="text-white mt-auto" style={{ background: 'linear-gradient(135deg, #7030ef 0%, #db1fff 100%)' }}>
-            {/* Section 1: List your Show */}
-            <div className="bg-black/10 py-4 border-b border-white/10">
-                <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <div className="flex items-center gap-3">
-                        <Ticket size={24} className="text-white/90" strokeWidth={1.5} />
-                        <span className="font-bold text-sm">List your Show</span>
-                    </div>
-                    <p className="hidden md:block text-xs text-white/80">
-                        Got a show, event, activity or a great experience? Partner with us & get listed
-                    </p>
-                    <Link href="/submit-event" className="bg-white text-[#7030ef] hover:bg-white/90 px-5 py-2 rounded font-bold text-xs transition-colors shadow-premium">
-                        Contact today!
-                    </Link>
-                </div>
-            </div>
 
 
 
-            {/* Section 3: Links */}
-            <div className="bg-black/15 py-12">
-                <div className="max-w-7xl mx-auto px-6 space-y-8">
-                    {/* Categories */}
-                    <div>
-                        <h4 className="text-[11px] font-bold text-white/60 uppercase tracking-wider mb-2">Events by Category</h4>
-                        <div className="text-[11px] text-white/80 leading-relaxed flex flex-wrap gap-1">
-                            {loading ? (
-                                <span className="text-white/50">Loading...</span>
-                            ) : (preferences?.categories || []).map((cat, i, arr) => (
-                                <React.Fragment key={cat.id}>
-                                    <Link href={`/events?category=${encodeURIComponent(cat.name)}`} className="hover:text-white underline-offset-4 hover:underline transition-all">{cat.name}</Link>
-                                    {i < arr.length - 1 && <span className="mx-1 text-white/30">|</span>}
-                                </React.Fragment>
-                            ))}
-                        </div>
-                    </div>
-
-
-                    {/* Help */}
-                    <div>
-                        <h4 className="text-[11px] font-bold text-white/60 uppercase tracking-wider mb-2">Help</h4>
-                        <div className="text-[11px] text-white/80 leading-relaxed flex flex-wrap gap-1">
-                            {['FAQs', 'Terms and Conditions', 'Privacy Policy', 'Feedback', 'Contact Us'].map((item, i, arr) => (
-                                <React.Fragment key={item}>
-                                    <Link href="#" className="hover:text-white underline-offset-4 hover:underline transition-all">{item}</Link>
-                                    {i < arr.length - 1 && <span className="mx-1 text-white/30">|</span>}
-                                </React.Fragment>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             {/* Section 4: Logo & Socials */}
             <div className="bg-black/30 py-10 border-t border-white/10">
                 <div className="max-w-7xl mx-auto px-6 text-center">
-                    {/* Logo Divider (Cleaner Border Method) */}
-                    <div className="flex items-center gap-4 mb-8">
+                    <div className="flex items-center gap-4 mb-6">
                         <div className="flex-1 border-t border-white/10"></div>
                         <h2 className="text-3xl font-black italic text-white tracking-tighter uppercase select-none">
                             Konkani<span className="text-white/60 not-italic font-light">Show</span>
                         </h2>
                         <div className="flex-1 border-t border-white/10"></div>
+                    </div>
+
+                    {/* Links - Moved here */}
+                    <div className="space-y-6 mb-8">
+                        {/* Categories */}
+                        <div>
+                            <h4 className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-3">Events by Category</h4>
+                            <div className="text-[11px] text-white/80 leading-relaxed flex flex-wrap justify-center gap-y-2 gap-x-1">
+                                {loading ? (
+                                    <span className="text-white/50">Loading...</span>
+                                ) : (preferences?.categories || []).map((cat, i, arr) => (
+                                    <React.Fragment key={cat.id}>
+                                        <Link href={`/events?category=${encodeURIComponent(cat.name)}`} className="hover:text-white transition-all whitespace-nowrap">{cat.name}</Link>
+                                        {i < arr.length - 1 && <span className="mx-2 text-white/20">|</span>}
+                                    </React.Fragment>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Help */}
+                        <div>
+                            <h4 className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-3">Help</h4>
+                            <div className="text-[11px] text-white/80 leading-relaxed flex flex-wrap justify-center gap-y-2 gap-x-1">
+                                {['FAQs', 'Terms and Conditions', 'Privacy Policy', 'Feedback', 'Contact Us'].map((item, i, arr) => (
+                                    <React.Fragment key={item}>
+                                        <Link href="#" className="hover:text-white transition-all whitespace-nowrap">{item}</Link>
+                                        {i < arr.length - 1 && <span className="mx-2 text-white/20">|</span>}
+                                    </React.Fragment>
+                                ))}
+                            </div>
+                        </div>
                     </div>
 
                     {/* Social Icons */}
