@@ -120,6 +120,7 @@ export default function HomePage() {
             <h2 className="text-2xl font-black text-foreground">
                 Shows Near You
             </h2>
+            <Link href="/events?filter=nearby" className="text-primary font-bold hover:underline">See All</Link>
           </div>
           <div className="space-y-12">
             {nearbyLoading ? (

@@ -24,6 +24,14 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: '*.amazonaws.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.picsum.photos',
+      },
     ],
   },
   turbopack: {

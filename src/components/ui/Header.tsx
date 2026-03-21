@@ -155,7 +155,7 @@ const Header = () => {
             </div>
 
             {/* Upper Header: Logo, Search, Location, Login */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
                 <div className="flex items-center justify-between gap-8 py-4 md:py-5">
                     {/* Logo with Glow */}
                     <Link href="/" className="flex-shrink-0 group">
@@ -171,7 +171,7 @@ const Header = () => {
                     >
                         <input
                             type="text"
-                            placeholder="Search for Events, Categories, or Tags"
+                            placeholder="Search for Events"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full pl-12 pr-4 py-2.5 bg-white/10 backdrop-blur-xl border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/40 text-sm text-white placeholder:text-white/50 transition-all duration-300 focus:bg-white/20 group-hover:border-white/40 shadow-inner"
@@ -212,7 +212,7 @@ const Header = () => {
 
                             {/* City Dropdown */}
                             {isCityDropdownOpen && (
-                                <div className="absolute top-full right-0 mt-3 w-56 bg-white  shadow-premium z-[60] py-2 border border-surface-200 animate-in fade-in slide-in-from-top-2 duration-200 text-[#1a1a1a]">
+                                <div className="absolute top-full right-0 mt-3 w-56 bg-white  shadow-premium z-[100] py-2 border border-surface-200 animate-in fade-in slide-in-from-top-2 duration-200 text-[#1a1a1a]">
                                     <div className="px-4 py-2 flex justify-between items-center border-b border-surface-50 mb-1">
                                         <span className="text-[10px] font-black text-[#666666] uppercase tracking-widest">Select Cities</span>
                                         {selectedCities.length > 0 && (

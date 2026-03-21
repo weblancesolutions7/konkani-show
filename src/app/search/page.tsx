@@ -17,10 +17,10 @@ function SearchResults() {
     const searchParams = useSearchParams();
     const urlQuery = searchParams.get('q') || '';
     const urlLocation = searchParams.get('location') || '';
-    
+
     const { preferences } = usePreferences();
     const { location: userLocation } = useUserLocation();
-    
+
     const [filters, setFilters] = useState({
         date: '',
         categories: [] as string[],
@@ -67,11 +67,11 @@ function SearchResults() {
         <main className="min-h-screen bg-surface-50 py-12 pb-24">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col md:flex-row gap-8 lg:gap-12">
-                    
+
                     {/* Sticky Sidebar */}
                     <aside className="w-full md:w-64 lg:w-72 shrink-0">
                         <div className="sticky top-24">
-                            <FilterSidebar 
+                            <FilterSidebar
                                 filters={filters}
                                 onFilterChange={setFilters}
                                 availableCategories={availableCategories}
@@ -94,7 +94,7 @@ function SearchResults() {
                             <p className="text-surface-800/60 font-medium text-lg mb-6">
                                 {pagination.total} {pagination.total === 1 ? 'event' : 'events'} found.
                             </p>
-                            <CategoryPills 
+                            <CategoryPills
                                 categories={allCategories}
                                 selectedCategory={topCategory}
                                 onSelect={handleTopCategorySelect}
@@ -115,8 +115,8 @@ function SearchResults() {
                                             <EventSearchCard key={event.id} event={event} />
                                         ))}
                                     </div>
-                                    
-                                    <Pagination 
+
+                                    <Pagination
                                         currentPage={pagination.currentPage}
                                         totalPages={pagination.totalPages}
                                         totalItems={pagination.total}
@@ -129,12 +129,12 @@ function SearchResults() {
                                 </>
                             ) : (
                                 <div className="text-center py-24 bg-white  border-2 border-dashed border-surface-200 shadow-sm">
-                                <div className="mb-4">
-                                    <Search size={64} className="text-surface-300 mx-auto" strokeWidth={1.5} />
-                                </div>
+                                    <div className="mb-4">
+                                        <Search size={64} className="text-surface-300 mx-auto" strokeWidth={1.5} />
+                                    </div>
                                     <h3 className="text-2xl font-bold text-surface-900 mb-2">No results found</h3>
                                     <p className="text-surface-600 px-6">We couldn't find any events matching your criteria.</p>
-                                    <button 
+                                    <button
                                         onClick={() => {
                                             setFilters({ date: '', categories: [], tags: [], priceRange: [0, 0] });
                                         }}

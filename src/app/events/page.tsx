@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useEvents } from '@/hooks/useEvents';
 import { usePreferences } from '@/hooks/usePreferences';
 import { useUserLocation } from '@/hooks/useUserLocation';
@@ -9,17 +10,31 @@ import FilterSidebar from '@/components/event/FilterSidebar';
 import CategoryPills from '@/components/event/CategoryPills';
 import { Theater } from 'lucide-react';
 
-export default function EventsPage() {
+import { Suspense } from 'react';
+
+function EventsList() {
     const { preferences } = usePreferences();
     const { location } = useUserLocation();
     const [selectedCities, setSelectedCities] = useState<string[]>([]);
-    
+    const searchParams = useSearchParams();
+
+    // URL parameters
+    const sortParam = searchParams.get('sort') || undefined;
+    const categoryParam = searchParams.get('category') || '';
+
     const [filters, setFilters] = useState({
         date: '',
-        categories: [] as string[],
+        categories: categoryParam ? [categoryParam] : [] as string[],
         tags: [] as string[],
         priceRange: [0, 0] as [number, number],
     });
+
+    // Sync categories if URL param changes
+    useEffect(() => {
+        if (categoryParam) {
+            setFilters(f => ({ ...f, categories: [categoryParam] }));
+        }
+    }, [categoryParam]);
 
     useEffect(() => {
         const loadCities = () => {
@@ -57,30 +72,33 @@ export default function EventsPage() {
         undefined,
         location?.lat,
         location?.lng,
-        undefined,
+        sortParam,
         undefined, // language (removed)
         filters.priceRange[0] || undefined,
         filters.priceRange[1] || undefined,
         filters.date,
-        filters.tags
+        filters.tags,
+        1,
+        20,
+        sortParam === 'featured'
     );
 
     const activeCity = selectedCities.length > 0 ? (selectedCities[0] === 'Worldwide' ? 'All Cities' : selectedCities[0]) : 'All Cities';
 
     const availableCategories = preferences?.categories?.map(c => ({ id: c.name, name: c.name })) || [];
     const allCategories = [{ id: 'all', name: 'All' }, ...availableCategories];
-    
+
     const availableTags = preferences?.tags || [];
 
     return (
         <main className="min-h-screen bg-surface-50 py-12 pb-24">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col md:flex-row gap-8 lg:gap-12">
-                    
+
                     {/* Sticky Sidebar */}
                     <aside className="w-full md:w-64 lg:w-72 shrink-0">
                         <div className="sticky top-24">
-                            <FilterSidebar 
+                            <FilterSidebar
                                 filters={filters}
                                 onFilterChange={setFilters}
                                 availableCategories={availableCategories}
@@ -95,7 +113,7 @@ export default function EventsPage() {
                             <h1 className="text-3xl font-black text-foreground mb-6">
                                 Events In {activeCity}
                             </h1>
-                            <CategoryPills 
+                            <CategoryPills
                                 categories={allCategories}
                                 selectedCategory={topCategory}
                                 onSelect={handleTopCategorySelect}
@@ -117,12 +135,12 @@ export default function EventsPage() {
                                 </div>
                             ) : (
                                 <div className="text-center py-24 bg-white  border-2 border-dashed border-surface-200 shadow-sm">
-                                <div className="mb-4">
-                                    <Theater size={64} className="text-surface-300 mx-auto" strokeWidth={1.5} />
-                                </div>
+                                    <div className="mb-4">
+                                        <Theater size={64} className="text-surface-300 mx-auto" strokeWidth={1.5} />
+                                    </div>
                                     <h3 className="text-2xl font-bold text-surface-900 mb-2">No events found</h3>
                                     <p className="text-surface-600 px-6">Try adjusting your filters to find what you're looking for.</p>
-                                    <button 
+                                    <button
                                         onClick={() => {
                                             setFilters({ date: '', categories: [], tags: [], priceRange: [0, 0] });
                                         }}
@@ -137,6 +155,18 @@ export default function EventsPage() {
                 </div>
             </div>
         </main>
+    );
+}
+
+export default function EventsPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-surface-50 flex items-center justify-center">
+                <div className="w-12 h-12 border-4 border-primary/20 border-t-primary  animate-spin" />
+            </div>
+        }>
+            <EventsList />
+        </Suspense>
     );
 }
 
