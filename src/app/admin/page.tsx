@@ -184,11 +184,11 @@ export default function AdminDashboard() {
     };
 
     const handleEdit = (id: string) => {
-        router.push(`/admin/events/${id}/edit`);
+        router.push(`/admin/events/${id}/edit?from=${currentView}`);
     };
 
     const handlePreview = (id: string) => {
-        router.push(`/admin/events/${id}`);
+        router.push(`/admin/events/${id}?from=${currentView}`);
     };
 
     return (

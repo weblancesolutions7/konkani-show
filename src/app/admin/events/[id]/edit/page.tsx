@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { API_ROUTES } from '@/config/api';
 import { Event } from '@/types';
 import EditEventForm from '@/components/admin/EditEventForm';
@@ -14,6 +14,8 @@ import { ArrowLeft as ArrowLeftIcon } from 'lucide-react';
 export default function AdminEventEditPage() {
     const params = useParams();
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const from = searchParams.get('from') || 'approval';
     const { showAlert } = useNotification();
     const [event, setEvent] = useState<Event | null>(null);
     const [loading, setLoading] = useState(true);
@@ -62,9 +64,9 @@ export default function AdminEventEditPage() {
                 event={event}
                 onSave={() => {
                     showAlert('Changes saved successfully!', 'Success');
-                    router.push(`/admin/events/${event.id}`);
+                    router.push(`/admin/events/${event.id}?from=${from}`);
                 }}
-                onCancel={() => router.push(`/admin/events/${event.id}`)}
+                onCancel={() => router.push(`/admin/events/${event.id}?from=${from}`)}
             />
         </div>
     );

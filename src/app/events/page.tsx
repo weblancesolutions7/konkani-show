@@ -12,6 +12,7 @@ import { Theater } from 'lucide-react';
 export default function EventsPage() {
     const { preferences } = usePreferences();
     const { location } = useUserLocation();
+    const [selectedCities, setSelectedCities] = useState<string[]>([]);
     
     const [filters, setFilters] = useState({
         date: '',
@@ -19,6 +20,22 @@ export default function EventsPage() {
         tags: [] as string[],
         priceRange: [0, 0] as [number, number],
     });
+
+    useEffect(() => {
+        const loadCities = () => {
+            const saved = localStorage.getItem('selectedCities');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed)) setSelectedCities(parsed);
+                } catch (e) { console.error(e); }
+            }
+        };
+
+        loadCities();
+        window.addEventListener('cityChange', loadCities);
+        return () => window.removeEventListener('cityChange', loadCities);
+    }, []);
 
     // Derive top category for the pill bar
     const topCategory = filters.categories.length === 1 ? filters.categories[0] : (filters.categories.length === 0 ? 'all' : '');
@@ -36,7 +53,7 @@ export default function EventsPage() {
         filters.categories.join(','),
         'APPROVED',
         undefined,
-        location?.city,
+        selectedCities.length > 0 && selectedCities[0] !== 'Worldwide' ? selectedCities.join(',') : undefined,
         undefined,
         location?.lat,
         location?.lng,
@@ -47,6 +64,8 @@ export default function EventsPage() {
         filters.date,
         filters.tags
     );
+
+    const activeCity = selectedCities.length > 0 ? (selectedCities[0] === 'Worldwide' ? 'All Cities' : selectedCities[0]) : 'All Cities';
 
     const availableCategories = preferences?.categories?.map(c => ({ id: c.name, name: c.name })) || [];
     const allCategories = [{ id: 'all', name: 'All' }, ...availableCategories];
@@ -74,7 +93,7 @@ export default function EventsPage() {
                     <div className="flex-1 min-w-0">
                         <header className="mb-8">
                             <h1 className="text-3xl font-black text-foreground mb-6">
-                                Events In {location?.city || 'Your Area'}
+                                Events In {activeCity}
                             </h1>
                             <CategoryPills 
                                 categories={allCategories}

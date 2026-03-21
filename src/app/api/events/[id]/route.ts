@@ -41,13 +41,27 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         const body = await request.json();
 
         // Process potential startAt date changes
-        if (body.date && body.time) {
+        if (body.date) {
             try {
-                const [day, month, year] = body.date.split('-').map(Number);
-                const [hours, minutes] = body.time.split(':').map(Number);
-                const dateObj = new Date(year, month - 1, day, hours || 0, minutes || 0);
-                if (!isNaN(dateObj.getTime())) {
-                    body.startAt = dateObj;
+                const dateStr = body.date;
+                const timeStr = body.time || '00:00';
+                const parts = dateStr.split('-');
+                if (parts.length === 3) {
+                    const [p1, p2, p3] = parts.map(Number);
+                    const [hours, minutes] = timeStr.split(':').map(Number);
+                    
+                    let dateObj: Date;
+                    if (p1 > 31) {
+                        // YYYY-MM-DD
+                        dateObj = new Date(p1, p2 - 1, p3, hours || 0, minutes || 0);
+                    } else {
+                        // DD-MM-YYYY
+                        dateObj = new Date(p3, p2 - 1, p1, hours || 0, minutes || 0);
+                    }
+                    
+                    if (!isNaN(dateObj.getTime())) {
+                        body.startAt = dateObj.getTime();
+                    }
                 }
             } catch (e) {
                 console.error('Error parsing date for startAt:', e);

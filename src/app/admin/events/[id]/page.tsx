@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { API_ROUTES } from '@/config/api';
 import { Event } from '@/types';
 import EventDetailsView from '@/components/event/EventDetailsView';
@@ -11,6 +12,8 @@ import { useNotification } from '@/components/ui/NotificationProvider';
 export default function AdminEventReviewPage() {
     const params = useParams();
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const from = searchParams.get('from') || 'approval';
     const { showAlert } = useNotification();
     const [event, setEvent] = useState<Event | null>(null);
     const [loading, setLoading] = useState(true);
@@ -116,60 +119,81 @@ export default function AdminEventReviewPage() {
 
     return (
         <div className="bg-surface-50">
-            {/* Admin Control Bar */}
-            <div className="sticky top-0 z-50 bg-white border-b border-surface-200 shadow-sm p-4 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <button
-                        onClick={() => router.push('/admin')}
-                        className="w-10 h-10 flex items-center justify-center hover:bg-surface-100 rounded-xl transition-colors"
-                    >
-                        <ArrowLeft size={20} strokeWidth={3} />
-                    </button>
-                    <div>
-                        <h1 className="text-lg font-black leading-none">Reviewing: {event.title}</h1>
-                        <p className="text-xs font-bold text-surface-400 uppercase tracking-widest mt-1">Status: {event.status}</p>
+            {/* Branded Admin Control Bar */}
+            <div className="sticky top-0 z-50 text-white shadow-premium overflow-hidden">
+                {/* Background & Animation Container */}
+                <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(135deg, #7030ef 0%, #db1fff 100%)' }}>
+                    <div className="absolute inset-0 opacity-20">
+                        <div className="absolute inset-y-0 w-1/4 bg-white/30 -skew-x-12 animate-sweep blur-2xl" style={{ left: '-50%' }} />
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                    {event.status === 'PENDING' && (
-                        <>
-                            <button
-                                onClick={handleApprove}
-                                disabled={actionLoading}
-                                className="px-6 py-2.5 bg-emerald-600 text-white text-xs font-black uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2 rounded-xl"
-                            >
-                                {actionLoading ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} strokeWidth={3} />}
-                                Approve
-                            </button>
-                            <button
-                                onClick={handleReject}
-                                disabled={actionLoading}
-                                className="px-6 py-2.5 bg-rose-600 text-white text-xs font-black uppercase tracking-widest hover:bg-rose-700 transition-all shadow-lg shadow-rose-500/20 flex items-center gap-2 rounded-xl"
-                            >
-                                {actionLoading ? <Loader2 size={14} className="animate-spin" /> : <X size={14} strokeWidth={3} />}
-                                Reject
-                            </button>
-                        </>
-                    )}
+                <div className="relative z-10 max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+                    <div className="flex items-center gap-6">
+                        <button
+                            onClick={() => router.push(`/admin?view=${from}`)}
+                            className="w-10 h-10 flex items-center justify-center hover:bg-white/20 rounded-xl transition-all border border-white/10 active:scale-95"
+                            title="Back to Dashboard"
+                        >
+                            <ArrowLeft size={20} strokeWidth={3} />
+                        </button>
+                        
+                        <div className="flex flex-col">
+                            <h1 className="text-sm font-black leading-none tracking-tight">Reviewing: {event.title}</h1>
+                            <p className="text-[10px] font-black text-white/60 uppercase tracking-[0.2em] mt-1">Status: {event.status}</p>
+                        </div>
+                    </div>
 
-                    <button
-                        onClick={handleToggleFeatured}
-                        disabled={actionLoading}
-                        className={`px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all shadow-md group ${event.isFeatured ? 'bg-amber-500 text-white shadow-amber-500/20' : 'bg-surface-200 text-surface-600 hover:bg-surface-300'}`}
-                    >
-                        <Star size={14} fill={event.isFeatured ? 'currentColor' : 'none'} strokeWidth={3} className="group-hover:scale-110 transition-transform" />
-                        {event.isFeatured ? 'Featured' : 'Feature'}
-                    </button>
+                    <div className="flex items-center gap-3">
+                        {event.status === 'PENDING' && (
+                            <>
+                                <button
+                                    onClick={handleApprove}
+                                    disabled={actionLoading}
+                                    className="px-5 py-2 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-900/20 flex items-center gap-2 rounded-lg border border-white/10"
+                                >
+                                    {actionLoading ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} strokeWidth={4} />}
+                                    Approve
+                                </button>
+                                <button
+                                    onClick={handleReject}
+                                    disabled={actionLoading}
+                                    className="px-5 py-2 bg-rose-500 text-white text-[10px] font-black uppercase tracking-widest hover:bg-rose-400 transition-all shadow-lg shadow-rose-900/20 flex items-center gap-2 rounded-lg border border-white/10"
+                                >
+                                    {actionLoading ? <Loader2 size={12} className="animate-spin" /> : <X size={12} strokeWidth={4} />}
+                                    Reject
+                                </button>
+                            </>
+                        )}
 
-                    <button
-                        onClick={() => router.push(`/admin/events/${event.id}/edit`)}
-                        className="px-6 py-2.5 bg-surface-900 text-white text-xs font-black uppercase tracking-widest hover:bg-black transition-all flex items-center gap-2 rounded-xl"
-                    >
-                        <Pencil size={14} strokeWidth={3} />
-                        Edit Details
-                    </button>
+                        <button
+                            onClick={handleToggleFeatured}
+                            disabled={actionLoading}
+                            className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all shadow-md group border border-white/10 ${event.isFeatured ? 'bg-amber-500 text-white' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                        >
+                            <Star size={12} fill={event.isFeatured ? 'currentColor' : 'none'} strokeWidth={3} className="group-hover:scale-110 transition-transform" />
+                            {event.isFeatured ? 'Featured' : 'Feature'}
+                        </button>
+
+                        <button
+                            onClick={() => router.push(`/admin/events/${event.id}/edit?from=${from}`)}
+                            className="px-5 py-2 bg-white text-[#7030ef] text-[10px] font-black uppercase tracking-widest hover:bg-surface-50 transition-all flex items-center gap-2 rounded-lg shadow-xl shadow-black/10"
+                        >
+                            <Pencil size={12} strokeWidth={4} />
+                            Edit Details
+                        </button>
+                    </div>
                 </div>
+
+                <style jsx>{`
+                    @keyframes sweep {
+                        0% { transform: translateX(0) skewX(-12deg); }
+                        100% { transform: translateX(1000%) skewX(-12deg); }
+                    }
+                    .animate-sweep {
+                        animation: sweep 5s infinite;
+                    }
+                `}</style>
             </div>
 
             <div className="relative">

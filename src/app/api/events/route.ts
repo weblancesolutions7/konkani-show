@@ -114,8 +114,32 @@ export async function GET(request: NextRequest) {
             allEvents = allEvents.filter(ev =>
                 (ev.title && ev.title.toLowerCase().includes(lowerQuery)) ||
                 (ev.description && ev.description.toLowerCase().includes(lowerQuery)) ||
-                (ev.location && ev.location.toLowerCase().includes(lowerQuery))
+                (ev.location && ev.location.toLowerCase().includes(lowerQuery)) ||
+                (ev.category && ev.category.toLowerCase().includes(lowerQuery)) ||
+                (ev.tags && ev.tags.some(tag => tag.toLowerCase().includes(lowerQuery)))
             ) as any;
+        }
+
+        // 🚨 Strict Location Filtering if location is provided
+        if (locations.length > 0 && !locations.some(loc => loc.toLowerCase() === 'worldwide')) {
+            allEvents = allEvents.filter(ev => {
+                const eventLocation = (ev.location || '').toLowerCase();
+                const eventCity = (ev.locationDetails?.city || '').toLowerCase();
+                
+                return locations.some(loc => {
+                    const l = loc.toLowerCase();
+                    // Basic match
+                    if (eventLocation.includes(l) || eventCity.includes(l)) return true;
+                    
+                    // Common Aliases/Mappings for the region
+                    if (l === 'mangalore' && (eventLocation.includes('mangaluru') || eventCity.includes('mangaluru'))) return true;
+                    if (l === 'mangaluru' && (eventLocation.includes('mangalore') || eventCity.includes('mangalore'))) return true;
+                    if (l === 'bangalore' && (eventLocation.includes('bengaluru') || eventCity.includes('bengaluru'))) return true;
+                    if (l === 'bengaluru' && (eventLocation.includes('bangalore') || eventCity.includes('bangalore'))) return true;
+                    
+                    return false;
+                });
+            }) as any;
         }
 
         // Additional tags filter if multiple tags were requested

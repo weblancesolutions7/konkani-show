@@ -60,7 +60,7 @@ export default function HomePage() {
   );
 
   const { events: featuredEvents, loading: featLoading } = useEvents(
-    undefined, undefined, undefined, undefined, undefined, undefined, undefined, 'featured'
+    undefined, undefined, undefined, undefined, undefined, undefined, undefined, 'featured', undefined, undefined, undefined, undefined, undefined, 1, 20, true
   );
 
   if (prefLoading) {
@@ -118,7 +118,7 @@ export default function HomePage() {
         <section className="mb-16">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-black text-foreground">
-                {location?.source === 'browser' ? 'Shows Near You (Precise)' : `Shows Near ${location?.city || 'You'}`}
+                Shows Near You
             </h2>
           </div>
           <div className="space-y-12">

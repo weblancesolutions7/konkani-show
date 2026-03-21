@@ -46,18 +46,6 @@ const Footer = () => {
                         </div>
                     </div>
 
-                    {/* Locations */}
-                    <div>
-                        <h4 className="text-[11px] font-bold text-white/60 uppercase tracking-wider mb-2">Events in Top Cities</h4>
-                        <div className="text-[11px] text-white/80 leading-relaxed flex flex-wrap gap-1">
-                            {['Mangaluru', 'Udupi', 'Goa', 'Mumbai', 'Bengaluru', 'Kuwait', 'Dubai'].map((city, i, arr) => (
-                                <React.Fragment key={city}>
-                                    <Link href={`/events?city=${encodeURIComponent(city)}`} className="hover:text-white underline-offset-4 hover:underline transition-all">{city}</Link>
-                                    {i < arr.length - 1 && <span className="mx-1 text-white/30">|</span>}
-                                </React.Fragment>
-                            ))}
-                        </div>
-                    </div>
 
                     {/* Help */}
                     <div>

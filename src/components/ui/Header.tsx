@@ -171,7 +171,7 @@ const Header = () => {
                     >
                         <input
                             type="text"
-                            placeholder="Search for Events and Shows"
+                            placeholder="Search for Events, Categories, or Tags"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full pl-12 pr-4 py-2.5 bg-white/10 backdrop-blur-xl border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/40 text-sm text-white placeholder:text-white/50 transition-all duration-300 focus:bg-white/20 group-hover:border-white/40 shadow-inner"
@@ -283,17 +283,21 @@ const Header = () => {
                                                         <MapPin size={16} strokeWidth={2.5} />
                                                     </div>
                                                     <div>
-                                                        <p className="text-xs font-black text-primary uppercase tracking-widest">Current Location</p>
-                                                        <p className="text-sm font-bold text-surface-900 group-hover:text-primary transition-colors">{location?.city || 'Detecting...'}</p>
+                                                        <p className="text-xs font-black text-primary uppercase tracking-widest">
+                                                            {location?.source === 'browser' ? 'Live Location' : 'Detect Current Location'}
+                                                        </p>
+                                                        <p className="text-sm font-bold text-surface-900 group-hover:text-primary transition-colors">
+                                                            {location?.city || (location ? 'Location detected' : 'Detecting...')}
+                                                        </p>
                                                     </div>
                                                 </button>
 
                                                 <button
-                                                    onClick={() => { setSelectedCities([]); localStorage.setItem('selectedCities', JSON.stringify([])); window.dispatchEvent(new Event('cityChange')); setIsCityDropdownOpen(false); }}
-                                                    className={`w-full text-left px-4 py-3 text-sm font-bold transition-colors flex items-center justify-between border-b border-surface-50 ${selectedCities.length === 0 ? 'text-primary bg-primary/5' : 'text-[#333333] hover:bg-surface-50'}`}
+                                                    onClick={() => { setSelectedCities(['Worldwide']); localStorage.setItem('selectedCities', JSON.stringify(['Worldwide'])); window.dispatchEvent(new Event('cityChange')); setIsCityDropdownOpen(false); }}
+                                                    className={`w-full text-left px-4 py-3 text-sm font-bold transition-colors flex items-center justify-between border-b border-surface-50 ${selectedCities.includes('Worldwide') || selectedCities.length === 0 ? 'text-primary bg-primary/5' : 'text-[#333333] hover:bg-surface-50'}`}
                                                 >
                                                     Worldwide (All Cities)
-                                                    {selectedCities.length === 0 && (
+                                                    {(selectedCities.includes('Worldwide') || selectedCities.length === 0) && (
                                                         <Check size={16} strokeWidth={3} className="text-primary" />
                                                     )}
                                                 </button>

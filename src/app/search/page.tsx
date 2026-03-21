@@ -45,7 +45,7 @@ function SearchResults() {
         filters.categories.join(','),
         'APPROVED',
         undefined,
-        urlLocation || userLocation?.city,
+        urlLocation || undefined,
         urlQuery || undefined,
         userLocation?.lat,
         userLocation?.lng,

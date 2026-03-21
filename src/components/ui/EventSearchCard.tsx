@@ -27,7 +27,16 @@ const EventSearchCard: React.FC<EventSearchCardProps> = ({ event }) => {
   };
 
   // Extract price from entry or price field
-  const displayPrice = event.entry || (event.price ? `₹ ${event.price} onwards` : '');
+  const getDisplayPrice = () => {
+      if (event.entry) {
+          const isNumeric = /^\d+$/.test(event.entry.trim().replace('₹', '').trim());
+          if (isNumeric) return `₹ ${event.entry.trim().replace('₹', '').trim()} onwards`;
+          return event.entry;
+      }
+      if (event.price) return `₹ ${event.price} onwards`;
+      return '';
+  };
+  const displayPrice = getDisplayPrice();
 
   return (
     <Link href={`/event/${event.slug}`} className="group flex flex-col w-full h-full bg-white transition-all duration-300">
@@ -67,7 +76,7 @@ const EventSearchCard: React.FC<EventSearchCardProps> = ({ event }) => {
               </p>
               {displayPrice && (
                   <p className="text-[15px] font-bold text-[#707684] truncate">
-                      {displayPrice.includes('₹') ? displayPrice : `₹ ${displayPrice} onwards`}
+                      {displayPrice}
                   </p>
               )}
           </div>

@@ -20,7 +20,8 @@ export function useEvents(
     dateFilter?: string,
     tags?: string[],
     page: number = 1,
-    limit: number = 20
+    limit: number = 20,
+    featured?: boolean
 ) {
     const [events, setEvents] = useState<Event[]>([]);
     const [pagination, setPagination] = useState({ total: 0, totalPages: 1, currentPage: 1, limit: 20 });
@@ -44,6 +45,7 @@ export function useEvents(
             if (maxPrice !== undefined) params.set('maxPrice', maxPrice.toString());
             if (dateFilter) params.set('dateFilter', dateFilter);
             if (tags && tags.length > 0) params.set('tags', tags.join(','));
+            if (featured) params.set('featured', 'true');
             params.set('page', page.toString());
             params.set('limit', limit.toString());
 

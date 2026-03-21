@@ -8,8 +8,22 @@ export interface LocationData {
 }
 
 const LOCATION_STORAGE_KEY = 'user_location_data';
+const NOMINATIM_BASE_URL = 'https://nominatim.openstreetmap.org';
 
-export async function getBrowserLocation(): Promise<Pick<LocationData, 'lat' | 'lng'>> {
+export async function reverseGeocode(lat: number, lng: number): Promise<string | undefined> {
+    try {
+        const response = await fetch(`${NOMINATIM_BASE_URL}/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10&addressdetails=1`);
+        if (!response.ok) return undefined;
+        const data = await response.json();
+        // Try to get city, town, village or suburb
+        return data.address.city || data.address.town || data.address.village || data.address.suburb || data.address.county;
+    } catch (error) {
+        console.error('Reverse geocoding error:', error);
+        return undefined;
+    }
+}
+
+export async function getBrowserLocation(): Promise<Pick<LocationData, 'lat' | 'lng' | 'city'>> {
     return new Promise((resolve, reject) => {
         if (!navigator.geolocation) {
             reject(new Error('Geolocation not supported'));
@@ -17,10 +31,13 @@ export async function getBrowserLocation(): Promise<Pick<LocationData, 'lat' | '
         }
 
         navigator.geolocation.getCurrentPosition(
-            (position) => {
+            async (position) => {
+                const { latitude, longitude } = position.coords;
+                const city = await reverseGeocode(latitude, longitude);
                 resolve({
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude,
+                    lat: latitude,
+                    lng: longitude,
+                    city: city
                 });
             },
             (error) => {

@@ -140,6 +140,9 @@ export async function PUT(request: NextRequest) {
             }));
         }
 
+        // Remove id from update body to avoid DynamoDB "Cannot update attribute id" error
+        delete body.id;
+
         const preferences = await PreferencesModel.update(
             { id: 'singleton' },
             body
