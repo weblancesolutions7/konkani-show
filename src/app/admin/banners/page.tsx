@@ -5,11 +5,14 @@ import React, { useState } from 'react';
 import { usePreferences } from '@/hooks/usePreferences';
 import { useNotification } from '@/components/ui/NotificationProvider';
 import { Trash2, Pencil, ChevronUp, ChevronDown, Upload, Plus, Info, Loader2, X } from 'lucide-react';
+import Pagination from '@/components/ui/Pagination';
 
 export default function BannersPage() {
     const { showAlert, showConfirm } = useNotification();
     const { preferences, loading, updatePreferences } = usePreferences();
     const [isSaving, setIsSaving] = useState(false);
+    const [page, setPage] = useState(1);
+    const limit = 5;
 
     // Hero Manager State
     const [editingHeroId, setEditingHeroId] = useState<string | null>(null);
@@ -288,56 +291,80 @@ export default function BannersPage() {
                         {/* List */}
                         <div className="space-y-4 pt-4 border-t border-surface-200">
                             <h3 className="text-sm font-black uppercase tracking-widest text-surface-400">Current Banners & Priority</h3>
-                            {(preferences?.heroBanners || []).map((f, i) => (
-                                <div key={f.id || i} className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-surface-200 shadow-sm hover:shadow-md transition-shadow group">
-                                    <div className="w-24 h-12 rounded-xl bg-surface-100 overflow-hidden flex-shrink-0 border border-surface-200 relative">
-                                        <img src={f.imageUrl} className="w-full h-full object-cover" alt="Banner" />
-                                        <div className="absolute top-1 right-1 bg-black/60 text-white text-[8px] px-1 rounded-full font-bold">
-                                            #{i + 1}
-                                        </div>
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-xs text-surface-500 truncate italic">
-                                            {f.link || 'Internal Page (No Link)'}
-                                        </p>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex flex-col gap-0.5">
-                                            <button
-                                                disabled={i === 0}
-                                                onClick={() => handleReorderFeatured(i, i - 1)}
-                                                className="p-1 hover:bg-surface-50 rounded disabled:opacity-20 transition-colors text-surface-400 hover:text-primary"
-                                                title="Move Up"
-                                            >
-                                                <ChevronUp size={16} strokeWidth={3} />
-                                            </button>
-                                            <button
-                                                disabled={i === (preferences!.heroBanners.length - 1)}
-                                                onClick={() => handleReorderFeatured(i, i + 1)}
-                                                className="p-1 hover:bg-surface-50 rounded disabled:opacity-20 transition-colors text-surface-400 hover:text-primary"
-                                                title="Move Down"
-                                            >
-                                                <ChevronDown size={16} strokeWidth={3} />
-                                            </button>
-                                        </div>
-                                        <div className="h-8 w-px bg-surface-200" />
-                                        <button
-                                            onClick={() => startEditingHero(f)}
-                                            className="p-2 hover:bg-primary/10 text-primary  transition-colors"
-                                            title="Edit"
-                                        >
-                                            <Pencil size={16} />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeleteHeroItem(f.id)}
-                                            className="p-2 hover:bg-rose-50 text-rose-500  transition-colors"
-                                            title="Delete"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
+                            {(() => {
+                                const banners = preferences?.heroBanners || [];
+                                const paginatedBanners = banners.slice((page - 1) * limit, page * limit);
+                                
+                                return (
+                                    <>
+                                        {paginatedBanners.map((f, i) => {
+                                            const globalIndex = (page - 1) * limit + i;
+                                            return (
+                                                <div key={f.id || globalIndex} className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-surface-200 shadow-sm hover:shadow-md transition-shadow group">
+                                                    <div className="w-24 h-12 rounded-xl bg-surface-100 overflow-hidden flex-shrink-0 border border-surface-200 relative">
+                                                        <img src={f.imageUrl} className="w-full h-full object-cover" alt="Banner" />
+                                                        <div className="absolute top-1 right-1 bg-black/60 text-white text-[8px] px-1 rounded-full font-bold">
+                                                            #{globalIndex + 1}
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-xs text-surface-500 truncate italic">
+                                                            {f.link || 'Internal Page (No Link)'}
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="flex flex-col gap-0.5">
+                                                            <button
+                                                                disabled={globalIndex === 0}
+                                                                onClick={() => handleReorderFeatured(globalIndex, globalIndex - 1)}
+                                                                className="p-1 hover:bg-surface-50 rounded disabled:opacity-20 transition-colors text-surface-400 hover:text-primary"
+                                                                title="Move Up"
+                                                            >
+                                                                <ChevronUp size={16} strokeWidth={3} />
+                                                            </button>
+                                                            <button
+                                                                disabled={globalIndex === (banners.length - 1)}
+                                                                onClick={() => handleReorderFeatured(globalIndex, globalIndex + 1)}
+                                                                className="p-1 hover:bg-surface-50 rounded disabled:opacity-20 transition-colors text-surface-400 hover:text-primary"
+                                                                title="Move Down"
+                                                            >
+                                                                <ChevronDown size={16} strokeWidth={3} />
+                                                            </button>
+                                                        </div>
+                                                        <div className="h-8 w-px bg-surface-200" />
+                                                        <button
+                                                            onClick={() => startEditingHero(f)}
+                                                            className="p-2 hover:bg-primary/10 text-primary  transition-colors"
+                                                            title="Edit"
+                                                        >
+                                                            <Pencil size={16} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteHeroItem(f.id)}
+                                                            className="p-2 hover:bg-rose-50 text-rose-500  transition-colors"
+                                                            title="Delete"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+
+                                        {banners.length > limit && (
+                                            <div className="pt-6 border-t border-surface-100">
+                                                <Pagination 
+                                                    currentPage={page}
+                                                    totalPages={Math.ceil(banners.length / limit)}
+                                                    onPageChange={setPage}
+                                                    totalItems={banners.length}
+                                                    itemsPerPage={limit}
+                                                />
+                                            </div>
+                                        )}
+                                    </>
+                                );
+                            })()}
                         </div>
                     </div>
                 </section>

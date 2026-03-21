@@ -40,6 +40,25 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Global Clickable Elements */
+a, 
+button, 
+[role="button"], 
+input[type="submit"], 
+input[type="button"], 
+input[type="reset"],
+select,
+summary {
+  cursor: pointer;
+}
+
+button:disabled, 
+input:disabled, 
+select:disabled, 
+[disabled] {
+  cursor: not-allowed;
+}
+
 .rounded-card-image {
   border-radius: 12px !important;
 }
