@@ -166,22 +166,26 @@ export default function AdminEventReviewPage() {
                             </>
                         )}
 
-                        <button
-                            onClick={handleToggleFeatured}
-                            disabled={actionLoading}
-                            className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all shadow-md group border border-white/10 ${event.isFeatured ? 'bg-amber-500 text-white' : 'bg-white/10 text-white hover:bg-white/20'}`}
-                        >
-                            <Star size={12} fill={event.isFeatured ? 'currentColor' : 'none'} strokeWidth={3} className="group-hover:scale-110 transition-transform" />
-                            {event.isFeatured ? 'Featured' : 'Feature'}
-                        </button>
+                        {event.status !== 'REJECTED' && (
+                            <>
+                                <button
+                                    onClick={handleToggleFeatured}
+                                    disabled={actionLoading}
+                                    className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all shadow-md group border border-white/10 ${event.isFeatured ? 'bg-amber-500 text-white' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                                >
+                                    <Star size={12} fill={event.isFeatured ? 'currentColor' : 'none'} strokeWidth={3} className="group-hover:scale-110 transition-transform" />
+                                    {event.isFeatured ? 'Featured' : 'Feature'}
+                                </button>
 
-                        <button
-                            onClick={() => router.push(`/admin/events/${event.id}/edit?from=${from}`)}
-                            className="px-5 py-2 bg-white text-[#7030ef] text-[10px] font-black uppercase tracking-widest hover:bg-surface-50 transition-all flex items-center gap-2 rounded-lg shadow-xl shadow-black/10"
-                        >
-                            <Pencil size={12} strokeWidth={4} />
-                            Edit Details
-                        </button>
+                                <button
+                                    onClick={() => router.push(`/admin/events/${event.id}/edit?from=${from}`)}
+                                    className="px-5 py-2 bg-white text-[#7030ef] text-[10px] font-black uppercase tracking-widest hover:bg-surface-50 transition-all flex items-center gap-2 rounded-lg shadow-xl shadow-black/10"
+                                >
+                                    <Pencil size={12} strokeWidth={4} />
+                                    Edit Details
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
 

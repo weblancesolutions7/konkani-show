@@ -32,7 +32,7 @@ const AdminTable: React.FC<AdminTableProps> = ({ events, onApprove, onReject, on
                                     <div className="flex items-center gap-4">
                                          <div className="w-12 h-12 rounded-lg bg-surface-200 overflow-hidden flex-shrink-0 relative group/img">
                                             <img src={event.featureImage} alt={event.title} className="w-full h-full object-cover" />
-                                            {onToggleFeatured && (
+                                            {onToggleFeatured && event.status !== 'REJECTED' && (
                                                 <button 
                                                     onClick={(e) => {
                                                         e.stopPropagation();
@@ -99,7 +99,7 @@ const AdminTable: React.FC<AdminTableProps> = ({ events, onApprove, onReject, on
                                                 <Eye size={14} strokeWidth={3} /> View
                                             </a>
                                         )}
-                                        {onEdit && (
+                                        {onEdit && event.status !== 'REJECTED' && (
                                             <button 
                                                 onClick={() => onEdit(event.id)} 
                                                 className="p-1.5 bg-primary/10 text-primary hover:bg-primary/20 rounded-lg transition-colors flex items-center gap-1 text-[10px] font-black uppercase tracking-tighter"
