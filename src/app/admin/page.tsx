@@ -13,7 +13,7 @@ import Pagination from '@/components/ui/Pagination';
 
 type AdminView = 'featured' | 'timeline' | 'approval';
 type ApprovalStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
-type TimelineStatus = 'UPCOMING' | 'ONGOING' | 'COMPLETED';
+type TimelineStatus = 'UPCOMING' | 'COMPLETED';
 
 export default function AdminDashboard() {
     const router = useRouter();
@@ -204,7 +204,7 @@ export default function AdminDashboard() {
                                 ? 'Manage event submissions and their status.'
                                 : currentView === 'featured'
                                     ? 'Curated events highlighted on the main page.'
-                                    : 'Overview of upcoming, ongoing, and completed events sorted by date.'}
+                                : 'Overview of upcoming and completed events sorted by date.'}
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
@@ -235,7 +235,7 @@ export default function AdminDashboard() {
 
                         {currentView === 'timeline' && (
                             <div className="flex bg-surface-100 p-1.5 rounded-2xl border border-surface-200 w-fit">
-                                {(['UPCOMING', 'ONGOING', 'COMPLETED'] as TimelineStatus[]).map(tab => (
+                                {(['UPCOMING', 'COMPLETED'] as TimelineStatus[]).map(tab => (
                                     <button
                                         key={tab}
                                         onClick={() => setActiveTimelineTab(tab)}
@@ -276,9 +276,9 @@ export default function AdminDashboard() {
                             events={events}
                             onApprove={handleApprove}
                             onReject={handleReject}
-                            onEdit={handleEdit}
+                            onEdit={currentView === 'timeline' && activeTimelineTab === 'COMPLETED' ? undefined : handleEdit}
                             onPreview={handlePreview}
-                            onToggleFeatured={handleToggleFeatured}
+                            onToggleFeatured={currentView === 'timeline' && activeTimelineTab === 'COMPLETED' ? undefined : handleToggleFeatured}
                         />
                     )}
 
