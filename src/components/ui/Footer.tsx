@@ -46,12 +46,26 @@ const Footer = () => {
                         <div>
                             <h4 className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-3">Help</h4>
                             <div className="text-[11px] text-white/80 leading-relaxed flex flex-wrap justify-center gap-y-2 gap-x-1">
-                                {['FAQs', 'Terms and Conditions', 'Privacy Policy', 'Feedback', 'Contact Us'].map((item, i, arr) => (
-                                    <React.Fragment key={item}>
-                                        <Link href="#" className="hover:text-white transition-all whitespace-nowrap">{item}</Link>
+                                {[
+                                    { name: 'FAQs', href: '/faqs' },
+                                    { name: 'Terms and Conditions', href: '/terms' },
+                                    { name: 'Privacy Policy', href: '/privacy' }
+                                ].map((item, i, arr) => (
+                                    <React.Fragment key={item.name}>
+                                        <Link href={item.href} className="hover:text-white transition-all whitespace-nowrap">{item.name}</Link>
                                         {i < arr.length - 1 && <span className="mx-2 text-white/20">|</span>}
                                     </React.Fragment>
                                 ))}
+                            </div>
+                        </div>
+
+                        {/* Contact Details */}
+                        <div>
+                            <h4 className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-3">Contact</h4>
+                            <div className="text-[11px] text-white/80 leading-relaxed flex flex-wrap justify-center gap-y-2 gap-x-6">
+                                <span className="flex items-center gap-2"><Mail size={12} className="opacity-50" /> shashankfrancilla@gmail.com</span>
+                                <span>Phone: +91 123 456 7890</span>
+                                <span>Location: Panjim, Goa, India</span>
                             </div>
                         </div>
                     </div>

@@ -54,9 +54,6 @@ export async function GET(request: NextRequest) {
         }
         // Note: For timeline and featured views, we broad-scan and filter in-memory for robustness
 
-        if (tags.length > 0) {
-            scan = scan.where('tags').contains(tags[0]);
-        }
 
         if (language) {
             const languages = language.split(',');
@@ -142,11 +139,35 @@ export async function GET(request: NextRequest) {
             }) as any;
         }
 
-        // Additional tags filter if multiple tags were requested
-        if (tags.length > 1) {
+        // In-memory tags filtering (to avoid Dynamoose/DynamoDB issues with .contains() on reserved words during scan)
+        if (tags.length > 0) {
             allEvents = allEvents.filter(ev =>
-                tags.every(t => ev.tags && ev.tags.includes(t))
+                tags.every(t => ev.tags && Array.isArray(ev.tags) && ev.tags.includes(t))
             ) as any;
+        }
+
+        // In-memory price filtering
+        if (minPrice !== null || maxPrice !== null) {
+            const min = minPrice !== null ? parseFloat(minPrice) : 0;
+            const max = maxPrice !== null ? parseFloat(maxPrice) : Infinity;
+
+            allEvents = allEvents.filter(ev => {
+                let price = Number(ev.price);
+                
+                // Fallback for legacy data: try to extract price from entry field
+                if ((price === 0 || isNaN(price)) && ev.entry) {
+                    const match = ev.entry.match(/\d+/);
+                    if (match) price = parseInt(match[0], 10);
+                    else if (ev.entry.toLowerCase().includes('free')) price = 0;
+                    else if (ev.entry.toLowerCase().includes('paid')) price = 1;
+                }
+                if (isNaN(price)) price = 0;
+
+                // Special case for "Free" (0, 0)
+                if (min === 0 && max === 0) return price === 0;
+                // Case for "Paid" (1, 1000000) or any other range
+                return price >= min && price <= max;
+            }) as any;
         }
 
         let transformed = allEvents.map((event: any) => ({
@@ -279,6 +300,7 @@ export async function POST(request: NextRequest) {
             featureImage: body.featureImage,
             gallery: body.gallery || [],
             entry: body.entry || '',
+            price: body.price !== undefined ? body.price : 0,
             meetingLink: body.meetingLink || '',
             status: 'PENDING',
             isFeatured: false,

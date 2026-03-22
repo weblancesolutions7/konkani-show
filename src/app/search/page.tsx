@@ -25,7 +25,7 @@ function SearchResults() {
         date: '',
         categories: [] as string[],
         tags: [] as string[],
-        priceRange: [0, 0] as [number, number],
+        priceRange: [-1, -1] as [number, number],
     });
     const [page, setPage] = useState(1);
     const limit = 12;
@@ -51,15 +51,17 @@ function SearchResults() {
         userLocation?.lng,
         undefined,
         undefined, // language (removed)
-        filters.priceRange[0] || undefined,
-        filters.priceRange[1] || undefined,
+        filters.priceRange[0] === -1 ? undefined : filters.priceRange[0],
+        filters.priceRange[1] === -1 ? undefined : filters.priceRange[1],
         filters.date,
         filters.tags,
         page,
         limit
     );
 
-    const availableCategories = preferences?.categories?.map(c => ({ id: c.name, name: c.name })) || [];
+    const availableCategories = preferences?.categories
+        ?.filter(c => !['free', 'paid'].includes(c.name.toLowerCase()))
+        ?.map(c => ({ id: c.name, name: c.name })) || [];
     const allCategories = [{ id: 'all', name: 'All' }, ...availableCategories];
     const availableTags = preferences?.tags || [];
 
@@ -74,7 +76,6 @@ function SearchResults() {
                             <FilterSidebar
                                 filters={filters}
                                 onFilterChange={setFilters}
-                                availableCategories={availableCategories}
                                 availableTags={availableTags}
                             />
                         </div>

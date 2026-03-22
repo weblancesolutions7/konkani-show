@@ -5,7 +5,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUserLocation } from '@/hooks/useUserLocation';
-import { Search, MapPin, ChevronDown, Check } from 'lucide-react';
+import { Search, MapPin, ChevronDown, Check, X } from 'lucide-react';
 
 const Header = () => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -16,6 +16,7 @@ const Header = () => {
     const [recentCities, setRecentCities] = useState<string[]>([]);
 
     const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
+    const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
     const { location } = useUserLocation();
@@ -156,10 +157,10 @@ const Header = () => {
 
             {/* Upper Header: Logo, Search, Location, Login */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
-                <div className="flex items-center justify-between gap-8 py-4 md:py-5">
+                <div className="flex items-center justify-between gap-2 sm:gap-8 py-4 md:py-5">
                     {/* Logo with Glow */}
                     <Link href="/" className="flex-shrink-0 group">
-                        <h1 className="text-2xl md:text-3xl font-black italic text-white tracking-tighter uppercase transition-all duration-300 drop-shadow-[0_0_10px_rgba(255,255,255,0.4)] group-hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.7)] group-hover:scale-[1.02]">
+                        <h1 className="text-xl sm:text-2xl md:text-3xl font-black italic text-white tracking-tighter uppercase transition-all duration-300 drop-shadow-[0_0_10px_rgba(255,255,255,0.4)] group-hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.7)] group-hover:scale-[1.02]">
                             Konkani<span className="text-white/70 not-italic">Show</span>
                         </h1>
                     </Link>
@@ -332,18 +333,41 @@ const Header = () => {
 
                         <Link
                             href="/submit-event"
-                            className="relative px-6 py-2.5 bg-surface-50 text-primary text-[14px] font-black rounded-lg hover:bg-surface-100 transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.3)] active:scale-95 group overflow-hidden hidden sm:block"
+                            className="relative px-2.5 sm:px-6 py-1.5 sm:py-2.5 bg-surface-50 text-primary text-[10px] sm:text-[14px] font-black rounded-lg hover:bg-surface-100 transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.3)] active:scale-95 group overflow-hidden whitespace-nowrap"
                         >
-                            <span className="relative z-10">List Your Show</span>
+                            <span className="relative z-10 block sm:hidden">List Show</span>
+                            <span className="relative z-10 hidden sm:block">List Your Show</span>
                             <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/40 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                         </Link>
 
                         {/* Mobile Search Toggle */}
-                        <button className="md:hidden p-2 text-white/80 hover:text-white hover:bg-white/10  transition-all">
-                            <Search size={22} strokeWidth={2.5} />
+                        <button 
+                            onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
+                            className="md:hidden p-2 text-white/80 hover:text-white hover:bg-white/10  transition-all"
+                        >
+                            {isMobileSearchOpen ? <X size={22} strokeWidth={2.5} /> : <Search size={22} strokeWidth={2.5} />}
                         </button>
                     </div>
                 </div>
+
+                {/* Mobile Search Bar - Conditional */}
+                {isMobileSearchOpen && (
+                    <div className="md:hidden px-4 pb-4 animate-in slide-in-from-top-2 duration-200">
+                        <form onSubmit={handleSearch} className="relative group">
+                            <input
+                                type="text"
+                                placeholder="Search for Events"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/40 text-sm text-white placeholder:text-white/50 transition-all focus:bg-white/20"
+                                autoFocus
+                            />
+                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
+                                <Search size={16} strokeWidth={2.5} />
+                            </div>
+                        </form>
+                    </div>
+                )}
             </div>
 
             {/* Lower Header: Navigation Section - More Air, Refined items */}

@@ -11,14 +11,12 @@ interface FilterSidebarProps {
     priceRange: [number, number];
   };
   onFilterChange: (newFilters: any) => void;
-  availableCategories: { id: string; name: string }[];
   availableTags: { id: string; name: string }[];
 }
 
 const FilterSidebar: React.FC<FilterSidebarProps> = ({
   filters,
   onFilterChange,
-  availableCategories,
   availableTags
 }) => {
   const [expanded, setExpanded] = useState<string[]>(['date']);
@@ -72,10 +70,21 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   };
 
   const handlePriceClick = (type: 'Free' | 'Paid') => {
-    if (type === 'Free') {
-        onFilterChange({ ...filters, priceRange: [0, 0] });
+    const isFree = type === 'Free';
+    const isCurrentlyActive = isFree 
+        ? (filters.priceRange[0] === 0 && filters.priceRange[1] === 0)
+        : (filters.priceRange[0] === 1);
+    
+    if (isCurrentlyActive) {
+        // Toggle off
+        onFilterChange({ ...filters, priceRange: [-1, -1] });
     } else {
-        onFilterChange({ ...filters, priceRange: [1, 1000000] }); // Just a high number for "Paid"
+        // Toggle on
+        if (isFree) {
+            onFilterChange({ ...filters, priceRange: [0, 0] });
+        } else {
+            onFilterChange({ ...filters, priceRange: [1, 1000000] });
+        }
     }
   };
 
@@ -85,13 +94,26 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
         setDateRange({ start: '', end: '' });
         setIsCustomRangeOpen(false);
     }
-    else if (key === 'categories' || key === 'tags') onFilterChange({ ...filters, [key]: [] });
-    else if (key === 'priceRange') onFilterChange({ ...filters, priceRange: [0, 0] });
+    else if (key === 'tags') onFilterChange({ ...filters, [key]: [] });
+    else if (key === 'priceRange') onFilterChange({ ...filters, priceRange: [-1, -1] });
   };
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-black text-foreground mb-6">Filters</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-black text-foreground">Filters</h2>
+        <button 
+          onClick={() => onFilterChange({ 
+            date: '', 
+            categories: [], 
+            tags: [], 
+            priceRange: [-1, -1] 
+          })}
+          className="text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary-dark transition-colors"
+        >
+          Clear All
+        </button>
+      </div>
 
       {/* Date Filter */}
       <FilterAccordion 
@@ -157,29 +179,6 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
         </div>
       </FilterAccordion>
 
-      {/* Categories Filter */}
-      <FilterAccordion 
-        title="Categories" 
-        isOpen={expanded.includes('categories')} 
-        onToggle={() => toggleAccordion('categories')}
-        onClear={() => clearFilter('categories')}
-        isDirty={filters.categories.length > 0}
-      >
-        <div className="space-y-2 max-h-48 overflow-y-auto no-scrollbar pr-2">
-          {availableCategories.map(cat => (
-            <label key={cat.id} className="flex items-center gap-3 cursor-pointer group py-1">
-              <input 
-                type="checkbox" 
-                checked={filters.categories.includes(cat.id)}
-                onChange={() => toggleSelection('categories', cat.id)}
-                className="w-4 h-4 rounded border-surface-300 text-primary focus:ring-primary cursor-pointer"
-              />
-              <span className="text-sm font-medium text-surface-700 group-hover:text-primary transition-colors">{cat.name}</span>
-            </label>
-          ))}
-        </div>
-      </FilterAccordion>
-
       {/* Tags Filter */}
       <FilterAccordion 
         title="Tags" 
@@ -209,7 +208,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
         isOpen={expanded.includes('price')} 
         onToggle={() => toggleAccordion('price')}
         onClear={() => clearFilter('priceRange')}
-        isDirty={filters.priceRange[1] > 0}
+        isDirty={filters.priceRange[0] !== -1}
       >
         <div className="space-y-4">
           <div className="flex gap-2">
@@ -218,9 +217,8 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
                 key={p}
                 onClick={() => handlePriceClick(p as 'Free' | 'Paid')}
                 className={`flex-1 py-1.5 rounded-lg border text-sm font-medium transition-all ${
-                  (p === 'Free' && filters.priceRange[0] === 0 && filters.priceRange[1] === 0 && filters.date !== '') || // This is tricky, let's use a simpler check
-                  (p === 'Free' && filters.priceRange[0] === 0 && filters.priceRange[1] === 0 && expanded.includes('price') && filters.priceRange[1] === 0) ||
-                  (p === 'Paid' && filters.priceRange[0] > 0)
+                  (p === 'Free' && filters.priceRange[0] === 0 && filters.priceRange[1] === 0) ||
+                  (p === 'Paid' && filters.priceRange[0] === 1)
                   ? 'bg-primary text-white border-primary'
                   : 'bg-white text-surface-600 border-surface-100 hover:border-surface-300'
                 }`}

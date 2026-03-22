@@ -26,7 +26,7 @@ function EventsList() {
         date: '',
         categories: categoryParam ? [categoryParam] : [] as string[],
         tags: [] as string[],
-        priceRange: [0, 0] as [number, number],
+        priceRange: [-1, -1] as [number, number],
     });
 
     // Sync categories if URL param changes
@@ -74,8 +74,8 @@ function EventsList() {
         location?.lng,
         sortParam,
         undefined, // language (removed)
-        filters.priceRange[0] || undefined,
-        filters.priceRange[1] || undefined,
+        filters.priceRange[0] === -1 ? undefined : filters.priceRange[0],
+        filters.priceRange[1] === -1 ? undefined : filters.priceRange[1],
         filters.date,
         filters.tags,
         1,
@@ -85,7 +85,9 @@ function EventsList() {
 
     const activeCity = selectedCities.length > 0 ? (selectedCities[0] === 'Worldwide' ? 'All Cities' : selectedCities[0]) : 'All Cities';
 
-    const availableCategories = preferences?.categories?.map(c => ({ id: c.name, name: c.name })) || [];
+    const availableCategories = preferences?.categories
+        ?.filter(c => !['free', 'paid'].includes(c.name.toLowerCase()))
+        ?.map(c => ({ id: c.name, name: c.name })) || [];
     const allCategories = [{ id: 'all', name: 'All' }, ...availableCategories];
 
     const availableTags = preferences?.tags || [];
@@ -101,7 +103,6 @@ function EventsList() {
                             <FilterSidebar
                                 filters={filters}
                                 onFilterChange={setFilters}
-                                availableCategories={availableCategories}
                                 availableTags={availableTags}
                             />
                         </div>

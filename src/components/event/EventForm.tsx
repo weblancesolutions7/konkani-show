@@ -142,6 +142,15 @@ export default function EventForm({ initialData, onSubmit, isSubmitting, submitL
         if (locationData?.country) displayParts.push(locationData.country);
         const locationString = displayParts.join(', ') || initialData?.location || 'Online / TBD';
 
+        // Extract numeric price from entry string if possible
+        let numericPrice = 0;
+        if (entry) {
+            const match = entry.match(/\d+/);
+            if (match) numericPrice = parseInt(match[0], 10);
+            else if (entry.toLowerCase().includes('free')) numericPrice = 0;
+            else if (entry.toLowerCase().includes('paid')) numericPrice = 1; // Default min paid
+        }
+
         const eventData = {
             title,
             description,
@@ -159,6 +168,7 @@ export default function EventForm({ initialData, onSubmit, isSubmitting, submitL
             detailImage: detailImageUrl,
             gallery: initialData?.gallery || [],
             entry,
+            price: numericPrice,
             meetingLink,
         };
 
