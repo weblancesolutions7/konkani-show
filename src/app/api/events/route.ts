@@ -94,14 +94,27 @@ export async function GET(request: NextRequest) {
         }
 
         // In-memory timeline filtering
-        if (timeline) {
+        if (timeline === 'completed') {
             allEvents = allEvents.filter(ev => {
                 const start = parseEventDate(ev);
-                if (timeline === 'upcoming') return start > now;
-                if (timeline === 'ongoing') return start <= now && start > now - EVENT_DURATION;
-                if (timeline === 'completed') return start <= now - EVENT_DURATION;
-                return true;
+                return start <= now - EVENT_DURATION;
             }) as any;
+        } else {
+            // Default: Exclude completed events from all other views (featured, popular, search, etc.)
+            allEvents = allEvents.filter(ev => {
+                const start = parseEventDate(ev);
+                return start > now - EVENT_DURATION;
+            }) as any;
+
+            // Further narrow down if specific timeline is requested
+            if (timeline === 'upcoming') {
+                allEvents = allEvents.filter(ev => parseEventDate(ev) > now) as any;
+            } else if (timeline === 'ongoing') {
+                allEvents = allEvents.filter(ev => {
+                    const start = parseEventDate(ev);
+                    return start <= now && start > now - EVENT_DURATION;
+                }) as any;
+            }
         }
 
         // Cross-filter remaining items in-memory for complex text search or multiple tags
@@ -302,6 +315,7 @@ export async function POST(request: NextRequest) {
             entry: body.entry || '',
             price: body.price !== undefined ? body.price : 0,
             meetingLink: body.meetingLink || '',
+            contactNumber: body.contactNumber || '',
             status: 'PENDING',
             isFeatured: false,
         });

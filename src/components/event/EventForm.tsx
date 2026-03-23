@@ -51,6 +51,7 @@ export default function EventForm({ initialData, onSubmit, isSubmitting, submitL
     const [category, setCategory] = useState(initialData?.category || '');
     const [entry, setEntry] = useState(initialData?.entry || '');
     const [meetingLink, setMeetingLink] = useState(initialData?.meetingLink || '');
+    const [contactNumber, setContactNumber] = useState(initialData?.contactNumber || '');
 
     const [uploading, setUploading] = useState(false);
     const [detailUploading, setDetailUploading] = useState(false);
@@ -170,6 +171,7 @@ export default function EventForm({ initialData, onSubmit, isSubmitting, submitL
             entry,
             price: numericPrice,
             meetingLink,
+            contactNumber,
         };
 
         await onSubmit(eventData);
@@ -208,6 +210,17 @@ export default function EventForm({ initialData, onSubmit, isSubmitting, submitL
                                     onChange={(e) => setDescription(e.target.value)}
                                     rows={4}
                                     className="w-full p-5 bg-surface-50 rounded-2xl outline-none focus:bg-white focus:ring-4 focus:ring-primary/5 border-2 border-transparent focus:border-primary transition-all font-bold resize-none"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-xs font-black uppercase tracking-widest text-surface-800/40 ml-1">Contact Number</label>
+                                <input
+                                    type="tel"
+                                    placeholder="e.g. +91 98765 43210"
+                                    value={contactNumber}
+                                    onChange={(e) => setContactNumber(e.target.value)}
+                                    className="w-full p-5 bg-surface-50 rounded-2xl outline-none focus:bg-white border-2 border-transparent focus:border-primary transition-all font-bold"
                                 />
                             </div>
 

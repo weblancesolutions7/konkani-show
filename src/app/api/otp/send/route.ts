@@ -45,7 +45,7 @@ export async function POST(request: Request) {
                 },
                 Subject: { Data: "Your Konkani Show Verification Code" },
             },
-            Source: process.env.SES_FROM_EMAIL || "noreply@konkanishow.com",
+            Source: process.env.SES_FROM_EMAIL || "konkanishow@gmail.com",
         });
 
         await sesClient.send(command);

@@ -159,7 +159,32 @@ export default function AdminDashboard() {
         }
     };
 
-    // Delete functionality removed as per user request
+    const handleDelete = (id: string) => {
+        showConfirm(
+            'Are you sure you want to delete this event? This action cannot be undone.',
+            async () => {
+                setActionLoading(id);
+                try {
+                    const response = await fetch(API_ROUTES.EVENT_BY_ID(id), {
+                        method: 'DELETE',
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(errorData.details || errorData.error || 'Failed to delete');
+                    }
+                    fetchEvents();
+                    showAlert('Event deleted successfully.', 'Success');
+                } catch (error: any) {
+                    console.error('Delete failed:', error);
+                    showAlert(`Failed to delete: ${error.message}`, 'Error');
+                } finally {
+                    setActionLoading(null);
+                }
+            },
+            undefined,
+            'Delete Event?'
+        );
+    };
 
     const handleToggleFeatured = async (id: string, isFeatured: boolean) => {
         setActionLoading(id);
@@ -276,6 +301,8 @@ export default function AdminDashboard() {
                             events={events}
                             onApprove={handleApprove}
                             onReject={handleReject}
+                            onDelete={handleDelete}
+                            actionLoading={actionLoading}
                             onEdit={currentView === 'timeline' && activeTimelineTab === 'COMPLETED' ? undefined : handleEdit}
                             onPreview={handlePreview}
                             onToggleFeatured={currentView === 'timeline' && activeTimelineTab === 'COMPLETED' ? undefined : handleToggleFeatured}

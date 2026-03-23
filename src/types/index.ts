@@ -68,6 +68,7 @@ export interface Event {
   meetingLink?: string;
   status: EventStatus;
   isFeatured: boolean;
+  contactNumber?: string;
   startAt?: number;
   createdAt: string;
 }

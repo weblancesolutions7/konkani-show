@@ -7,7 +7,7 @@ import TagChip from '@/components/ui/TagChip';
 import CalendarButtons from '@/components/event/CalendarButtons';
 import EventMapView from '@/components/event/EventMapView';
 import { Event } from '@/types';
-import { Clock, MapPin, ArrowLeft, Map, Heart } from 'lucide-react';
+import { Clock, MapPin, ArrowLeft, Map, Heart, Phone } from 'lucide-react';
 
 interface EventDetailsViewProps {
     event: Event;
@@ -127,6 +127,20 @@ export default function EventDetailsView({ event, isAdminView = false }: EventDe
                             {event.description}
                         </p>
                     </section>
+
+                    {isAdminView && event.contactNumber && (
+                        <section className="bg-primary/5 p-6 rounded-xl border border-primary/20 shadow-sm">
+                            <h2 className="text-xl font-bold mb-4 text-primary border-b border-primary/10 pb-2 flex items-center gap-2">
+                                <Phone size={20} /> Organizer Contact
+                            </h2>
+                            <p className="text-lg font-black text-gray-900 tracking-tight">
+                                {event.contactNumber}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest">
+                                This information is only visible to administrators.
+                            </p>
+                        </section>
+                    )}
 
                     {event.gallery && event.gallery.length > 0 && (
                         <section className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">

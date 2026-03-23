@@ -17,6 +17,7 @@
   --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 
   --font-roboto: var(--font-roboto);
+  --font-poppins: var(--font-poppins);
 
   --background-brand-gradient: linear-gradient(135deg, #7030ef 0%, #db1fff 100%);
 }
@@ -67,6 +68,10 @@ select:disabled,
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.font-poppins {
+  font-family: var(--font-poppins), sans-serif !important;
 }
 
 .dark .glass-card {

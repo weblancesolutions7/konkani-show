@@ -93,7 +93,8 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     try {
         const { id } = await params;
 
-        await EventModel.delete(id);
+        // Soft delete by updating status to DELETED
+        await EventModel.update({ id }, { status: 'DELETED' });
 
         return NextResponse.json({ message: 'Event deleted successfully' });
     } catch (error: any) {

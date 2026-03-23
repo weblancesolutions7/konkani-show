@@ -1,7 +1,7 @@
 import React from 'react';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { Event } from '@/types';
-import { Star, Edit3, Eye, Check, X } from 'lucide-react';
+import { Star, Edit3, Eye, Check, X, Trash2, Loader2 } from 'lucide-react';
 
 interface AdminTableProps {
     events: Event[];
@@ -9,10 +9,12 @@ interface AdminTableProps {
     onReject?: (id: string) => void;
     onEdit?: (id: string) => void;
     onPreview?: (id: string) => void;
+    onDelete?: (id: string) => void;
     onToggleFeatured?: (id: string, isFeatured: boolean) => void;
+    actionLoading?: string | null;
 }
 
-const AdminTable: React.FC<AdminTableProps> = ({ events, onApprove, onReject, onEdit, onPreview, onToggleFeatured }) => {
+const AdminTable: React.FC<AdminTableProps> = ({ events, onApprove, onReject, onEdit, onPreview, onDelete, onToggleFeatured, actionLoading }) => {
     return (
         <div className="w-full overflow-x-auto rounded-2xl border border-surface-200 bg-white">
             <table className="w-full border-collapse text-left">
@@ -34,14 +36,19 @@ const AdminTable: React.FC<AdminTableProps> = ({ events, onApprove, onReject, on
                                             <img src={event.featureImage} alt={event.title} className="w-full h-full object-cover" />
                                             {onToggleFeatured && event.status !== 'REJECTED' && (
                                                 <button 
+                                                    disabled={actionLoading === event.id}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         onToggleFeatured(event.id, !event.isFeatured);
                                                     }}
-                                                    className={`absolute top-0 right-0 p-1.5 rounded-bl-lg transition-all ${event.isFeatured ? 'text-amber-500 bg-white/90' : 'text-surface-400 bg-white/40 opacity-0 group-hover/img:opacity-100'}`}
+                                                    className={`absolute top-0 right-0 p-1.5 rounded-bl-lg transition-all ${event.isFeatured ? 'text-amber-500 bg-white/90' : 'text-surface-400 bg-white/40 opacity-0 group-hover/img:opacity-100'} disabled:opacity-50`}
                                                     title={event.isFeatured ? "Unfeature Event" : "Feature Event"}
                                                 >
-                                                    <Star size={16} fill={event.isFeatured ? "currentColor" : "none"} strokeWidth={2.5} />
+                                                    {actionLoading === event.id ? (
+                                                        <Loader2 size={16} className="animate-spin" />
+                                                    ) : (
+                                                        <Star size={16} fill={event.isFeatured ? "currentColor" : "none"} strokeWidth={2.5} />
+                                                    )}
                                                 </button>
                                             )}
                                         </div>
@@ -63,20 +70,30 @@ const AdminTable: React.FC<AdminTableProps> = ({ events, onApprove, onReject, on
                                     <div className="flex gap-2">
                                         {onApprove && event.status === 'PENDING' && (
                                             <button 
+                                                disabled={actionLoading === event.id}
                                                 onClick={() => onApprove(event.id)} 
-                                                className="p-1.5 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-lg transition-colors flex items-center gap-1 text-[10px] font-black uppercase tracking-tighter"
+                                                className="p-1.5 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-lg transition-colors flex items-center gap-1 text-[10px] font-black uppercase tracking-tighter disabled:opacity-50 min-w-[80px] justify-center"
                                                 title="Approve"
                                             >
-                                                <Check size={14} strokeWidth={3} /> Approve
+                                                {actionLoading === event.id ? (
+                                                    <Loader2 size={14} className="animate-spin" />
+                                                ) : (
+                                                    <><Check size={14} strokeWidth={3} /> Approve</>
+                                                )}
                                             </button>
                                         )}
                                         {onReject && event.status === 'PENDING' && (
                                             <button 
+                                                disabled={actionLoading === event.id}
                                                 onClick={() => onReject(event.id)} 
-                                                className="p-1.5 bg-rose-100 text-rose-700 hover:bg-rose-200 rounded-lg transition-colors flex items-center gap-1 text-[10px] font-black uppercase tracking-tighter"
+                                                className="p-1.5 bg-rose-100 text-rose-700 hover:bg-rose-200 rounded-lg transition-colors flex items-center gap-1 text-[10px] font-black uppercase tracking-tighter disabled:opacity-50 min-w-[80px] justify-center"
                                                 title="Reject"
                                             >
-                                                <X size={14} strokeWidth={3} /> Reject
+                                                {actionLoading === event.id ? (
+                                                    <Loader2 size={14} className="animate-spin" />
+                                                ) : (
+                                                    <><X size={14} strokeWidth={3} /> Reject</>
+                                                )}
                                             </button>
                                         )}
                                         {onPreview && (
@@ -108,7 +125,20 @@ const AdminTable: React.FC<AdminTableProps> = ({ events, onApprove, onReject, on
                                                 <Edit3 size={14} strokeWidth={3} /> Edit
                                             </button>
                                         )}
-                                        {/* Delete button removed */}
+                                        {onDelete && (
+                                            <button 
+                                                disabled={actionLoading === event.id}
+                                                onClick={() => onDelete(event.id)} 
+                                                className="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors flex items-center gap-1 text-[10px] font-black uppercase tracking-tighter disabled:opacity-50 min-w-[80px] justify-center"
+                                                title="Delete Event"
+                                            >
+                                                {actionLoading === event.id ? (
+                                                    <Loader2 size={14} className="animate-spin" />
+                                                ) : (
+                                                    <><Trash2 size={14} strokeWidth={3} /> Delete</>
+                                                )}
+                                            </button>
+                                        )}
                                     </div>
                                 </td>
                             </tr>

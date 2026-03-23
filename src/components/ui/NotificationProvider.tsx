@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { Bell, CircleHelp } from 'lucide-react';
+import { Bell, CircleHelp, Loader2 } from 'lucide-react';
 
 type NotificationType = 'ALERT' | 'CONFIRM';
 
@@ -9,7 +9,7 @@ interface NotificationOptions {
     title?: string;
     message: string;
     type?: NotificationType;
-    onConfirm?: () => void;
+    onConfirm?: () => void | Promise<void>;
     onCancel?: () => void;
     confirmText?: string;
     cancelText?: string;
@@ -17,7 +17,7 @@ interface NotificationOptions {
 
 interface NotificationContextType {
     showAlert: (message: string, title?: string) => void;
-    showConfirm: (message: string, onConfirm: () => void, onCancel?: () => void, title?: string) => void;
+    showConfirm: (message: string, onConfirm: () => void | Promise<void>, onCancel?: () => void, title?: string) => void;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
@@ -33,6 +33,7 @@ export const useNotification = () => {
 export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [options, setOptions] = useState<NotificationOptions | null>(null);
+    const [loading, setLoading] = useState(false);
 
     const showAlert = useCallback((message: string, title: string = 'Notice') => {
         setOptions({
@@ -41,10 +42,11 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
             type: 'ALERT',
             confirmText: 'OK'
         });
+        setLoading(false);
         setIsOpen(true);
     }, []);
 
-    const showConfirm = useCallback((message: string, onConfirm: () => void, onCancel?: () => void, title: string = 'Confirm Action') => {
+    const showConfirm = useCallback((message: string, onConfirm: () => void | Promise<void>, onCancel?: () => void, title: string = 'Confirm Action') => {
         setOptions({
             title,
             message,
@@ -54,11 +56,21 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
             confirmText: 'Yes, Proceed',
             cancelText: 'Cancel'
         });
+        setLoading(false);
         setIsOpen(true);
     }, []);
 
-    const handleConfirm = () => {
-        if (options?.onConfirm) options.onConfirm();
+    const handleConfirm = async () => {
+        if (options?.onConfirm) {
+            setLoading(true);
+            try {
+                await options.onConfirm();
+            } catch (error) {
+                console.error('Action failed:', error);
+            } finally {
+                setLoading(false);
+            }
+        }
         setIsOpen(false);
     };
 
@@ -97,20 +109,29 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
                             {options.type === 'CONFIRM' && (
                                 <button
                                     onClick={handleCancel}
-                                    className="flex-1 py-3.5 bg-surface-100 text-surface-800 font-bold  hover:bg-surface-200 transition-colors"
+                                    disabled={loading}
+                                    className="flex-1 py-3.5 bg-surface-100 text-surface-800 font-bold  hover:bg-surface-200 transition-colors disabled:opacity-50"
                                 >
                                     {options.cancelText}
                                 </button>
                             )}
                             <button
                                 onClick={handleConfirm}
-                                className={`flex-1 py-3.5 font-bold  shadow-lg transition-all active:scale-95 ${
+                                disabled={loading}
+                                className={`flex-1 py-3.5 font-bold  shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 ${
                                     options.type === 'CONFIRM' 
                                         ? 'bg-primary text-white hover:bg-primary-dark' 
                                         : 'bg-primary text-white hover:bg-primary-dark'
-                                }`}
+                                } disabled:opacity-50`}
                             >
-                                {options.confirmText}
+                                {loading ? (
+                                    <>
+                                        <Loader2 size={18} className="animate-spin" />
+                                        <span>Processing...</span>
+                                    </>
+                                ) : (
+                                    options.confirmText
+                                )}
                             </button>
                         </div>
                     </div>

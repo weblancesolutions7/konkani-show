@@ -160,8 +160,8 @@ const Header = () => {
                 <div className="flex items-center justify-between gap-2 sm:gap-8 py-4 md:py-5">
                     {/* Logo with Glow */}
                     <Link href="/" className="flex-shrink-0 group">
-                        <h1 className="text-xl sm:text-2xl md:text-3xl font-black italic text-white tracking-tighter uppercase transition-all duration-300 drop-shadow-[0_0_10px_rgba(255,255,255,0.4)] group-hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.7)] group-hover:scale-[1.02]">
-                            Konkani<span className="text-white/70 not-italic">Show</span>
+                        <h1 className="text-xl sm:text-2xl md:text-3xl font-poppins font-black text-white tracking-normal uppercase transition-all duration-300 drop-shadow-[0_0_10px_rgba(255,255,255,0.4)] group-hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.7)] group-hover:scale-[1.02]">
+                            Konkani<span className="text-white/70">Show</span>
                         </h1>
                     </Link>
 

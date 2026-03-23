@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Heart, Headphones, Ticket, Mail } from 'lucide-react';
+import { Heart, Headphones, Ticket } from 'lucide-react';
 import { usePreferences } from '@/hooks/usePreferences';
 
 const Footer = () => {
@@ -63,9 +63,9 @@ const Footer = () => {
                         <div>
                             <h4 className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-3">Contact</h4>
                             <div className="text-[11px] text-white/80 leading-relaxed flex flex-wrap justify-center gap-y-2 gap-x-6">
-                                <span className="flex items-center gap-2"><Mail size={12} className="opacity-50" /> shashankfrancilla@gmail.com</span>
-                                <span>Phone: +91 123 456 7890</span>
-                                <span>Location: Panjim, Goa, India</span>
+
+                                <span>Phone: +91 9743730632</span>
+                                <span>Location: Mangalore, India</span>
                             </div>
                         </div>
                     </div>
@@ -84,9 +84,6 @@ const Footer = () => {
                     </div>
 
                     {/* Copyright & Info */}
-                    <p className="text-[10px] text-white/70 max-w-2xl mx-auto leading-relaxed">
-                        The ultimate platform for Konkani shows and events. Developed with <Heart size={10} className="inline-block fill-white/60 text-white/60 mx-0.5 mb-0.5" /> for the Konkani Community by WebLance Solutions.
-                    </p>
                     <p className="text-[10px] text-white/60 mt-1">
                         Copyright 2026 © Konkani Show Platform. All rights reserved.
                     </p>
